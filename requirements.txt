@@ -1,0 +1,6 @@
+numpy
+matplotlib
+numba
+gym
+pytest
+torch
