@@ -92,7 +92,7 @@ def _distance_rewards(d, proximity_threshold):
     Returns:
         np.array: 1d array of total rewards for each agent
     """
-    distance_rewards = np.exp(-60 * d) - float32(0.001)
+    distance_rewards = np.exp(-40 * d) - float32(0.001)
     for i in range(d.shape[0]):
         for j in range(d.shape[1]):
             if distance_rewards[i][j] < 0:
@@ -181,9 +181,8 @@ class BaseFlockEnv(gym.Env):
         speed and headings
         """
         act_vel = self.max_s*self.speed
-        angles = self.theta-np.pi
-        v0 = act_vel * np.cos(angles)
-        v1 = act_vel * np.sin(angles)
+        v0 = act_vel * np.cos(self.theta)
+        v1 = act_vel * np.sin(self.theta)
         self.x[0] = (self.x[0] + v0) % 1
         self.x[1] = (self.x[1] + v1) % 1
 
@@ -366,9 +365,14 @@ class DiscreteActionFlock(BaseFlockEnv):
         closest_y = np.take_along_axis(ys, sort_idx, axis=1)
         closest_h = np.take_along_axis(relative_headings, sort_idx, axis=1)
 
-        local_observation = np.concatenate([2*closest_x,
-                                            2*closest_y,
-                                            closest_h], axis=1)
+        # Rotate relative co-ords relative to each boids heading
+        cos_t = np.cos(self.theta)[:, np.newaxis]
+        sin_t = np.sin(self.theta)[:, np.newaxis]
+
+        x = (cos_t * closest_x + sin_t * closest_y)/self.max_distance
+        y = (cos_t * closest_y - sin_t * closest_x)/self.max_distance
+
+        local_observation = np.concatenate([x, y, closest_h], axis=1)
 
         return d, local_observation
 

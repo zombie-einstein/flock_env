@@ -37,6 +37,7 @@ def test_environment_initialization(params: Dict):
 @pytest.mark.parametrize("params", test_environments)
 def test_environment_reset(params: Dict):
     env = DiscreteActionFlock(**params)
+
     for _ in range(100):
         obs = env.reset()
         assert obs.shape == (params["n_agents"], 3*params["n_nearest"])
@@ -54,7 +55,7 @@ def test_agent_update(params: Dict):
     env = DiscreteActionFlock(**params)
 
     # Manually set phase space values
-    env.theta = np.array([np.pi for _ in range(n_agents)])
+    env.theta = np.array([0 for _ in range(n_agents)])
     env.speed = np.array([0.1 for _ in range(n_agents)])
     env.x = np.array([[0.5 for _ in range(n_agents)],
                       [0.5 for _ in range(n_agents)]])
@@ -85,7 +86,7 @@ def test_step(params: Dict):
         actions = np.random.randint(0, params["n_actions"], params["n_agents"])
         obs, rewards, done, debug = env.step(actions)
         assert obs.shape == (n_agents, n_nearest*3)
-        assert ((obs >= -1) & (obs <= 1)).all()
+        assert ((obs >= -1.0) & (obs <= 1.0)).all()
         assert ((env.x >= 0) & (env.x <= 1.0)).all()
         assert ((env.speed >= 0) & (env.speed <= 1.0)).all()
         assert ((env.theta >= 0) & (env.theta <= 2 * np.pi)).all()
