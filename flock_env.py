@@ -78,8 +78,8 @@ def _distances(xs, ys):
     return np.sqrt(np.power(xs, 2)+np.power(ys, 2))
 
 
-@njit(float32[:](float32[:, :], float32), fastmath=True)
-def _distance_rewards(d, proximity_threshold):
+@njit(float32[:](float32[:, :], float32, float32), fastmath=True)
+def _distance_rewards(d, proximity_threshold, distant_threshold):
     """
     Reward function based on distances between agents, for each agent
     the rewards are summed over contributions from all other boids
@@ -92,13 +92,11 @@ def _distance_rewards(d, proximity_threshold):
     Returns:
         np.array: 1d array of total rewards for each agent
     """
-    distance_rewards = np.exp(-40 * d) - float32(0.001)
+    distance_rewards = np.exp(-40 * d)
     for i in range(d.shape[0]):
         for j in range(d.shape[1]):
-            if distance_rewards[i][j] < 0:
+            if d[i][j] < proximity_threshold or d[i][j] > distant_threshold:
                 distance_rewards[i][j] = 0
-            elif d[i][j] < proximity_threshold:
-                distance_rewards[i][j] = -100
     return distance_rewards.sum(axis=1)
 
 
@@ -273,6 +271,7 @@ class DiscreteActionFlock(BaseFlockEnv):
                  n_steps: int,
                  rotation_size: float,
                  n_actions: int,
+                 distant_threshold: float = 0.01,
                  proximity_threshold: float = 0.001,
                  n_nearest: int = 10):
         """
@@ -289,6 +288,7 @@ class DiscreteActionFlock(BaseFlockEnv):
             rotation_size (float): Smallest rotation size in radians
             n_actions (int): NUmber of allowed rotations actions, should be an
                 odd integer >1
+            distant_threshold (float): Distance cut-off for rewards
             proximity_threshold (float, optional): Distance at which other
                 boids are considered too close for reward
             n_nearest (int): Number of agents to include in the local
@@ -296,6 +296,7 @@ class DiscreteActionFlock(BaseFlockEnv):
         """
         assert n_actions % 2 == 1, f"Number of actions must be an odd integer got {n_actions}"
         assert n_nearest <= n_agents, f"Number of agents included in observation should be <= number of agents"
+        assert distant_threshold > proximity_threshold
 
         super(DiscreteActionFlock, self).__init__(
             n_agents,
@@ -305,6 +306,8 @@ class DiscreteActionFlock(BaseFlockEnv):
 
         mid = (n_actions-1)//2
 
+        self.proximity_threshold = float32(self.proximity_threshold)
+        self.distant_threshold = float32(distant_threshold)
         self.n_actions = n_actions
         self.n_nearest = n_nearest
         self.rotations = PI32*np.arange(-mid, mid+1).astype(np.float32)*rotation_size
@@ -335,7 +338,9 @@ class DiscreteActionFlock(BaseFlockEnv):
         Returns:
             np.array: 1d array of reward values for each agent
         """
-        return _distance_rewards(d, self.proximity_threshold)
+        return _distance_rewards(
+            d, self.proximity_threshold, self.distant_threshold
+        )
 
     def _observe(self) -> np.array:
         """
