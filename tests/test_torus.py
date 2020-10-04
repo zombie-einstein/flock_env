@@ -12,26 +12,26 @@ import numpy as np
 
 
 def test_product_difference():
-    x = np.arange(3).astype(np.float32)
-    y = _product_difference(x)
-    assert y.shape == (3, 2)
-    assert np.array_equal(y[0], [1, 2])
-    assert np.array_equal(y[1], [-1, 1])
-    assert np.array_equal(y[2], [-2, -1])
+    x = np.arange(5).astype(np.float32)
+    y = _product_difference(x, 3)
+    assert y.shape == (3, 4)
+    assert np.array_equal(y[0], [1, 2, 3, 4])
+    assert np.array_equal(y[1], [-1, 1, 2, 3])
+    assert np.array_equal(y[2], [-2, -1, 1, 2])
 
 
 test_data = [
-    (np.array([1, 2]).astype(np.float32), 3.0),
-    (np.array([1, 9]).astype(np.float32), 10.0),
-    (np.array([1, 2]).astype(np.float32), 10.0),
-    (np.array([9, 1]).astype(np.float32), 10.0),
-    (np.array([0.1, 0.5]).astype(np.float32), 1.0)
+    (np.array([1, 2]).astype(np.float32), 3.0, 2),
+    (np.array([1, 9]).astype(np.float32), 10.0, 2),
+    (np.array([1, 2]).astype(np.float32), 10.0, 2),
+    (np.array([9, 1]).astype(np.float32), 10.0, 2),
+    (np.array([0.1, 0.5]).astype(np.float32), 1.0, 2)
 ]
 
 
-@pytest.mark.parametrize("x, l", test_data)
-def test_torus_vectors(x, l):
-    y1, y2 = _torus_vectors(x, l)
+@pytest.mark.parametrize("x, l, n", test_data)
+def test_torus_vectors(x, l, n):
+    y1, y2 = _torus_vectors(x, l, n)
 
     assert y1.shape == (2, 1)
     assert y2.shape == (2, 1)
@@ -42,10 +42,10 @@ def test_torus_vectors(x, l):
     assert np.isclose((x[1] + y2[1][0]) % l, x[0])
 
 
-@pytest.mark.parametrize("x, l", test_data)
-def test_shortest_torus_vectors(x, l):
-    y1, y2 = _torus_vectors(x, l)
-    y = _shortest_vec(x, l)
+@pytest.mark.parametrize("x, l, n", test_data)
+def test_shortest_torus_vectors(x, l, n):
+    y1, y2 = _torus_vectors(x, l, n)
+    y = _shortest_vec(x, l, n)
 
     assert y.shape == (2, 1)
 
