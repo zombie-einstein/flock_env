@@ -1,8 +1,8 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import gym
-from numba import njit, float32
+from numba import njit, float32, int32
 from numba.types import UniTuple
 
 
@@ -12,30 +12,31 @@ TPI = float32(2*np.pi)
 PI32 = float32(np.pi)
 
 
-@njit(float32[:, :](float32[:]))
-def _product_difference(a):
+@njit(float32[:, :](float32[:], int32))
+def _product_difference(a, n):
     """
     Generates 2d matrix of differences between all pairs in the argument array
     i.e. y[i][j] = x[j]-x[i]  for all i,j where i≠j
 
     Args:
         a (np.array): 1d array of 32bit floats
+        n (int): Number of entries in array that will form 1st index of result
 
     Returns:
         np.array: 2d Array of differences
     """
-    n = a.shape[0]
-    d = np.empty((n, n-1), dtype=float32)
+    m = a.shape[0]
+    d = np.empty((n, m-1), dtype=float32)
     for i in range(n):
         for j in range(i):
             d[i][j] = a[j] - a[i]
-        for j in range(i+1, n):
+        for j in range(i+1, m):
             d[i][j-1] = a[j] - a[i]
     return d
 
 
-@njit(UniTuple(float32[:, :], 2)(float32[:], float32))
-def _torus_vectors(a, l):
+@njit(UniTuple(float32[:, :], 2)(float32[:], float32, int32))
+def _torus_vectors(a, l, m):
     """
     Get pairs of vectors between two points, wrapping around the torus. This
     is done for all pairs of points in the argument array
@@ -51,12 +52,12 @@ def _torus_vectors(a, l):
         tuple(np.array, np.array): Tuple of 2d arrays containing the pairs
             of vectors for all pairs of points from the argument array
     """
-    x = _product_difference(a)
+    x = _product_difference(a, m)
     return x, np.sign(x)*(np.abs(x)-l)
 
 
-@njit(float32[:, :](float32[:], float32))
-def _shortest_vec(a, l):
+@njit(float32[:, :](float32[:], float32, int32))
+def _shortest_vec(a, l, m):
     """
     Get the shortest vector between pairs of points taking into account
     wrapping around the torus
@@ -68,7 +69,7 @@ def _shortest_vec(a, l):
     Returns:
         np.array: 2d array of shortest vectors between all pairs of points
     """
-    a, b = _torus_vectors(a, l)
+    a, b = _torus_vectors(a, l, m)
     return np.where(np.abs(a) < np.abs(b), a, b)
 
 
@@ -132,7 +133,7 @@ def _relative_headings(theta):
         np.array: 2d array of 32bit floats representing relative headings
             for pairs of boids
     """
-    return _shortest_vec(theta, TPI) / PI32
+    return _shortest_vec(theta, TPI, theta.shape[0]) / PI32
 
 
 class BaseFlockEnv(gym.Env):
@@ -140,7 +141,8 @@ class BaseFlockEnv(gym.Env):
                  n_agents: int,
                  max_s: float,
                  n_steps: int,
-                 proximity_threshold: float = 0.001):
+                 proximity_threshold: float = 0.001,
+                 obstacles: List[Tuple] = ()):
         """
         Initialize a flock environment
 
@@ -150,16 +152,22 @@ class BaseFlockEnv(gym.Env):
             n_steps (int): Number of steps in an episode
             proximity_threshold (float, optional): Distance at which boids are
                 penalised for being too close to other boids
+            obstacles (list[tuple]): Tuples of triples containing the centre of
+                the obstacles (x and y) and radius of environmental obstacles
         """
         self.n_agents = n_agents
+        self.n_obstacles = len(obstacles)
 
         # These arrays form the phase space of the flock
         # Position co-ords in 2d range [0, 1]
-        self.x = np.zeros((2, n_agents), dtype=np.float32)
+        self.x = np.zeros((2, n_agents+self.n_obstacles), dtype=np.float32)
+        self.x[:, self.n_agents:] = np.array([i[:2] for i in obstacles]).T.astype(np.float32)
         # Speed in range [0, 1]
         self.speed = np.zeros(n_agents, dtype=np.float32)
         # Heading in range [0, 2π]
         self.theta = np.zeros(n_agents, dtype=np.float32)
+
+        self.obstacle_radii = np.array([i[2] for i in obstacles])[np.newaxis, :].astype(np.float32)
 
         self.max_s = max_s
         self.n_steps = n_steps
@@ -170,7 +178,7 @@ class BaseFlockEnv(gym.Env):
         # The standard observation space is a local view on the phase space
         # for each agent i.e. 4 phase-space values x each other boid
         self.observation_space = gym.spaces.box.Box(
-            -1.0, 1.0, shape=(4*(self.n_agents-1),)
+            -1.0, 1.0, shape=(4*(self.n_agents-1)+2*self.n_obstacles,)
         )
 
     def _update_agents(self):
@@ -181,8 +189,8 @@ class BaseFlockEnv(gym.Env):
         act_vel = self.max_s*self.speed
         v0 = act_vel * np.cos(self.theta)
         v1 = act_vel * np.sin(self.theta)
-        self.x[0] = (self.x[0] + v0) % 1
-        self.x[1] = (self.x[1] + v1) % 1
+        self.x[0][:self.n_agents] = (self.x[0][:self.n_agents] + v0) % 1
+        self.x[1][:self.n_agents] = (self.x[1][:self.n_agents] + v1) % 1
 
     def _accelerate_agents(self, accelerations: np.array):
         """
@@ -211,6 +219,18 @@ class BaseFlockEnv(gym.Env):
             np.array: Array of observations
         """
         raise NotImplementedError
+
+    def _obstacle_penalties(self, ds: np.array):
+        """
+        Return penalties for agent colliding with obstacles
+
+        Args:
+            ds (np.array): 2d array distances to obstacles for each agent
+
+        Returns:
+
+        """
+        return -100*np.any(ds < self.obstacle_radii, axis=1)
 
     def _rewards(self, ds: np.array) -> np.array:
         """
@@ -273,7 +293,8 @@ class DiscreteActionFlock(BaseFlockEnv):
                  n_actions: int,
                  distant_threshold: float = 0.01,
                  proximity_threshold: float = 0.001,
-                 n_nearest: int = 10):
+                 n_nearest: int = 10,
+                 obstacles: List[Tuple] = ()):
         """
         Initialize a discrete action flock environment
 
@@ -302,7 +323,9 @@ class DiscreteActionFlock(BaseFlockEnv):
             n_agents,
             speed,
             n_steps,
-            proximity_threshold=proximity_threshold)
+            proximity_threshold=proximity_threshold,
+            obstacles=obstacles
+        )
 
         mid = (n_actions-1)//2
 
@@ -311,7 +334,12 @@ class DiscreteActionFlock(BaseFlockEnv):
         self.n_actions = n_actions
         self.n_nearest = n_nearest
         self.rotations = PI32*np.arange(-mid, mid+1).astype(np.float32)*rotation_size
-        self.observation_space = gym.spaces.box.Box(-1.0, 1.0, shape=(3 * n_nearest,))
+
+        observation_shape = (3 * n_nearest)+(2 * self.n_obstacles)
+
+        self.observation_space = gym.spaces.box.Box(
+            -1.0, 1.0, shape=(observation_shape,)
+        )
         self.action_space = gym.spaces.Discrete(self.rotations.shape[0])
 
     def _rotate_agents(self, actions: np.array):
@@ -338,9 +366,11 @@ class DiscreteActionFlock(BaseFlockEnv):
         Returns:
             np.array: 1d array of reward values for each agent
         """
-        return _distance_rewards(
-            d, self.proximity_threshold, self.distant_threshold
+        agent_rewards = _distance_rewards(
+            d[:, :self.n_agents], self.proximity_threshold, self.distant_threshold
         )
+        obstacle_penalties = self._obstacle_penalties(d[:, self.n_agents:])
+        return agent_rewards+obstacle_penalties
 
     def _observe(self) -> np.array:
         """
@@ -357,12 +387,12 @@ class DiscreteActionFlock(BaseFlockEnv):
             np.array: Array of local observations for each agent, bounded to
                 the range [-1,1]
         """
-        xs = _shortest_vec(self.x[0], 1.0)
-        ys = _shortest_vec(self.x[1], 1.0)
+        xs = _shortest_vec(self.x[0], 1.0, self.n_agents)
+        ys = _shortest_vec(self.x[1], 1.0, self.n_agents)
         d = _distances(xs, ys)
 
         # Sorted indices of flock members by distance
-        sort_idx = np.argsort(d, axis=1)[:, :self.n_nearest]
+        sort_idx = np.argsort(d[:, :self.n_agents-1], axis=1)[:, :self.n_nearest]
 
         relative_headings = _relative_headings(self.theta)
 
@@ -377,7 +407,13 @@ class DiscreteActionFlock(BaseFlockEnv):
         x = (cos_t * closest_x + sin_t * closest_y)/self.max_distance
         y = (cos_t * closest_y - sin_t * closest_x)/self.max_distance
 
-        local_observation = np.concatenate([x, y, closest_h], axis=1)
+        obstacle_xs = xs[:, self.n_agents-1:]
+        obstacle_ys = ys[:, self.n_agents-1:]
+
+        obstacle_x = (cos_t * obstacle_xs + sin_t * obstacle_ys)/self.max_distance
+        obstacle_y = (cos_t * obstacle_ys - sin_t * obstacle_xs)/self.max_distance
+
+        local_observation = np.concatenate([x, y, closest_h, obstacle_x, obstacle_y], axis=1)
 
         return d, local_observation
 
@@ -411,7 +447,7 @@ class DiscreteActionFlock(BaseFlockEnv):
         Returns:
             np.array: Array of local observations of the reset state
         """
-        self.x = np.random.random(size=(2, self.n_agents)).astype(np.float32)
+        self.x[:, :self.n_agents] = np.random.random(size=(2, self.n_agents)).astype(np.float32)
         self.speed = np.ones(self.n_agents).astype(np.float32)
         self.theta = TPI * np.random.random(self.n_agents).astype(np.float32)
         self.i = 0
