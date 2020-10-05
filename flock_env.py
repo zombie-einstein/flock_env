@@ -20,6 +20,7 @@ def _product_difference(a, n):
 
     Args:
         a (np.array): 1d array of 32bit floats
+        n (int): Number of entries in array that will form 1st index of result
 
     Returns:
         np.array: 2d Array of differences
@@ -366,9 +367,9 @@ class DiscreteActionFlock(BaseFlockEnv):
             np.array: 1d array of reward values for each agent
         """
         agent_rewards = _distance_rewards(
-            d[:, :-self.n_obstacles], self.proximity_threshold, self.distant_threshold
+            d[:, :self.n_agents], self.proximity_threshold, self.distant_threshold
         )
-        obstacle_penalties = self._obstacle_penalties(d[:, -self.n_obstacles:])
+        obstacle_penalties = self._obstacle_penalties(d[:, self.n_agents:])
         return agent_rewards+obstacle_penalties
 
     def _observe(self) -> np.array:
@@ -406,8 +407,8 @@ class DiscreteActionFlock(BaseFlockEnv):
         x = (cos_t * closest_x + sin_t * closest_y)/self.max_distance
         y = (cos_t * closest_y - sin_t * closest_x)/self.max_distance
 
-        obstacle_xs = xs[:, -self.n_obstacles:]
-        obstacle_ys = ys[:, -self.n_obstacles:]
+        obstacle_xs = xs[:, self.n_agents-1:]
+        obstacle_ys = ys[:, self.n_agents-1:]
 
         obstacle_x = (cos_t * obstacle_xs + sin_t * obstacle_ys)/self.max_distance
         obstacle_y = (cos_t * obstacle_ys - sin_t * obstacle_xs)/self.max_distance
