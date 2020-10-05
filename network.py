@@ -4,7 +4,6 @@ from torch import tanh
 
 
 class DQN(nn.Module):
-
     def __init__(self, inputs, outputs):
         super(DQN, self).__init__()
         self.fc1 = nn.Linear(inputs, 20)
