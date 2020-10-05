@@ -5,9 +5,7 @@ import torch
 
 
 class AgentReplayMemory:
-    def __init__(
-            self, capacity: int, n_agents: int, observation_size: int, device
-    ):
+    def __init__(self, capacity: int, n_agents: int, observation_size: int, device):
         """
         Initialize the agent based experience buffer. This is a
         multi-dimensional buffer containing columns for each agent included in
@@ -22,36 +20,38 @@ class AgentReplayMemory:
                 by the environment
             device: PyTorch device to push experience samples to
         """
-        h = (capacity - capacity % n_agents)//n_agents
-        self.capacity = h+1 if h*n_agents < capacity else h
+        h = (capacity - capacity % n_agents) // n_agents
+        self.capacity = h + 1 if h * n_agents < capacity else h
         self.n_agents = n_agents
 
         self.states = np.empty(
             (self.capacity, n_agents, observation_size), dtype=np.float32
         )
-        self.actions = np.empty(
-            (self.capacity, n_agents), dtype=np.int16
-        )[:, :, np.newaxis]
-        self.rewards = np.empty(
-            (self.capacity, n_agents), dtype=np.float32
-        )[:, :, np.newaxis]
+        self.actions = np.empty((self.capacity, n_agents), dtype=np.int16)[
+            :, :, np.newaxis
+        ]
+        self.rewards = np.empty((self.capacity, n_agents), dtype=np.float32)[
+            :, :, np.newaxis
+        ]
         self.next_states = np.empty(
             (self.capacity, n_agents, observation_size), dtype=np.float32
         )
-        self.dones = np.empty(
-            (self.capacity, n_agents), dtype=np.bool
-        )[:, :, np.newaxis]
+        self.dones = np.empty((self.capacity, n_agents), dtype=np.bool)[
+            :, :, np.newaxis
+        ]
 
         self.position = 0
         self.length = 0
         self.device = device
 
-    def push_agent_actions(self,
-                           states: np.array,
-                           actions: np.array,
-                           rewards: np.array,
-                           next_states: np.array,
-                           done: np.array):
+    def push_agent_actions(
+        self,
+        states: np.array,
+        actions: np.array,
+        rewards: np.array,
+        next_states: np.array,
+        done: np.array,
+    ):
         """
         Insert agent experiences into the buffer. When called new values are
         inserted at the current index, and for each agent. New values are
@@ -93,7 +93,11 @@ class AgentReplayMemory:
         actions = torch.from_numpy(self.actions[ix, iy]).long().to(self.device)
         rewards = torch.from_numpy(self.rewards[ix, iy]).float().to(self.device)
         next_states = torch.from_numpy(self.next_states[ix, iy]).float().to(self.device)
-        dones = torch.from_numpy(self.dones[ix, iy].astype(np.uint8)).float().to(self.device)
+        dones = (
+            torch.from_numpy(self.dones[ix, iy].astype(np.uint8))
+            .float()
+            .to(self.device)
+        )
 
         return states, actions, rewards, next_states, dones
 

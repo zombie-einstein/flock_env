@@ -1,28 +1,26 @@
 import numpy as np
-
-from agent_experience_buffer import AgentReplayMemory
-from network import DQN
-
 import torch
 import torch.optim as optim
 
+from agent_experience_buffer import AgentReplayMemory
+from network import DQN
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Agent:
-
-    def __init__(self,
-                 state_size,
-                 action_size,
-                 n_agents,
-                 buffer_size: int = 1e5,
-                 batch_size: int = 256,
-                 gamma: float = 0.995,
-                 tau: float = 1e-3,
-                 learning_rate: float = 7e-4,
-                 update_every: int = 4
-                 ):
+    def __init__(
+        self,
+        state_size,
+        action_size,
+        n_agents,
+        buffer_size: int = 1e5,
+        batch_size: int = 256,
+        gamma: float = 0.995,
+        tau: float = 1e-3,
+        learning_rate: float = 7e-4,
+        update_every: int = 4,
+    ):
         """
         Initialize DQN agent using the agent-experience buffer
 
@@ -47,11 +45,8 @@ class Agent:
         self.policy_net = DQN(state_size, action_size).to(device)
         self.target_net = DQN(state_size, action_size).to(device)
 
-        self.optimizer = optim.Adam(self.policy_net.parameters(),
-                                    lr=learning_rate)
-        self.memory = AgentReplayMemory(
-            buffer_size, n_agents, state_size, device
-        )
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=learning_rate)
+        self.memory = AgentReplayMemory(buffer_size, n_agents, state_size, device)
 
         self.t_step = 0
 
@@ -62,9 +57,7 @@ class Agent:
 
     def step(self, states, actions, rewards, next_steps, done):
 
-        self.memory.push_agent_actions(
-            states, actions, rewards, next_steps, done
-        )
+        self.memory.push_agent_actions(states, actions, rewards, next_steps, done)
 
         self.t_step = (self.t_step + 1) % self.update_every
         if self.t_step == 0:
@@ -83,9 +76,7 @@ class Agent:
         r = np.random.random(size=self.n_agents)
 
         action_values = np.argmax(action_values.cpu().data.numpy(), axis=1)
-        random_choices = np.random.randint(
-            0, self.action_size, size=self.n_agents
-        )
+        random_choices = np.random.randint(0, self.action_size, size=self.n_agents)
 
         return np.where(r > eps, action_values, random_choices)
 
@@ -124,7 +115,9 @@ class Agent:
             target_model (PyTorch model): weights will be copied to
             tau (float): interpolation parameter
         """
-        for target_param, local_param in zip(target_model.parameters(),
-                                             local_model.parameters()):
+        for target_param, local_param in zip(
+            target_model.parameters(), local_model.parameters()
+        ):
             target_param.data.copy_(
-                tau * local_param.data + (1 - tau) * target_param.data)
+                tau * local_param.data + (1 - tau) * target_param.data
+            )
