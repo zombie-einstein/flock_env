@@ -1,5 +1,7 @@
 # Boid Multi-Agent RL Environment & Multi-Agent RL Agent
 
+![alt text](images/009_161.gif?raw=true)![alt text](images/022_081.gif?raw=true)
+
 ## Introduction
 
 This repo contains modules for:
