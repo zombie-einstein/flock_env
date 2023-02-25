@@ -3,7 +3,7 @@ from typing import Dict
 import numpy as np
 import pytest
 
-from flock_env import DiscreteActionFlock
+from deprecated.flock_env import DiscreteActionFlock
 
 test_environments = [
     {
@@ -88,7 +88,8 @@ def test_agent_update(params: Dict):
         old_x = env.x.copy()
         env._update_agents()
         assert np.allclose(
-            env.x[0, :n_agents], old_x[0, :n_agents] + env.speed * params["speed"],
+            env.x[0, :n_agents],
+            old_x[0, :n_agents] + env.speed * params["speed"],
         )
         assert np.allclose(env.x[1, :n_agents], old_x[1, :n_agents])
         assert np.allclose(env.x[:, n_agents:], old_x[:, n_agents:])

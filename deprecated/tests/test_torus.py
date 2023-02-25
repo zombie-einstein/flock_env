@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from flock_env import (
+from deprecated.flock_env import (
     _distances,
     _product_difference,
     _relative_angles,

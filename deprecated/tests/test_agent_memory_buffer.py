@@ -1,6 +1,6 @@
 import numpy as np
 
-from agent_experience_buffer import AgentReplayMemory
+from deprecated.agent_experience_buffer import AgentReplayMemory
 
 
 def test_agent_replay_memory():

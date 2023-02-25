@@ -261,7 +261,7 @@ class BaseFlockEnv(gym.Env):
         self.obstacle_penalty_scaling = obstacle_penalty_scaling
         self.i = 0
         self.proximity_threshold = proximity_threshold
-        self.max_distance = np.sqrt(2 * (0.5 ** 2))
+        self.max_distance = np.sqrt(2 * (0.5**2))
 
         # The standard observation space is a local view on the phase space
         # for each agent i.e. 4 phase-space values x each other boid
@@ -467,7 +467,9 @@ class DiscreteActionFlock(BaseFlockEnv):
             np.array: 1d array of reward values for each agent
         """
         agent_rewards = self.flock_reward_scaling * _distance_rewards(
-            d[:, : self.n_agents - 1], self.proximity_threshold, self.distant_threshold,
+            d[:, : self.n_agents - 1],
+            self.proximity_threshold,
+            self.distant_threshold,
         )
         obstacle_penalties = self.obstacle_penalty_scaling * self._obstacle_penalties(
             d[:, self.n_agents - 1 :]
