@@ -1,3 +1,4 @@
+import typing
 from typing import Tuple, Union
 
 import chex
@@ -17,16 +18,22 @@ class EnvState:
 
 @struct.dataclass
 class EnvParams:
-    n_agents: int
-    min_speed: float
-    max_speed: float
-    max_rotate: float
-    max_accelerate: float
+    min_speed: float = 0.01
+    max_speed: float = 0.05
+    max_rotate: float = 0.1
+    max_accelerate: float = 0.025
+    square_range: float = 0.01
+    square_min_range: float = 0.0001
 
 
-class FlockEnv(environment.Environment):
-    def __init__(self, reward_func):
+class BaseFlockEnv(environment.Environment):
+    def __init__(self, reward_func: typing.Callable, n_agents: int):
         self.reward_func = reward_func
+        self.n_agents = n_agents
+
+    @property
+    def default_params(self) -> EnvParams:
+        return EnvParams()
 
     def step_env(
         self,
@@ -60,13 +67,13 @@ class FlockEnv(environment.Environment):
             time=state.time + 1,
         )
 
-        new_obs = self.get_obs(new_state)
-
-        rewards = jax.vmap(self.reward_func)(new_positions)
-
+        new_obs = self.get_obs(new_state, params)
+        rewards = jax.vmap(self.reward_func, in_axes=(0, None))(
+            new_positions, new_positions
+        )
         dones = self.is_terminal(state, params)
 
-        return (new_obs, new_state, rewards, dones, dict())
+        return new_obs, new_state, rewards, dones, dict()
 
     def reset_env(
         self, key: chex.PRNGKey, params: EnvParams
@@ -74,12 +81,12 @@ class FlockEnv(environment.Environment):
 
         k1, k2, k3 = jax.random.split(key, 3)
 
-        agent_positions = jax.random.uniform(k1, (params.n_agents, 2))
+        agent_positions = jax.random.uniform(k1, (self.n_agents, 2))
         agent_speeds = jax.random.uniform(
-            k2, (params.n_agents,), minval=params.min_speed, maxval=params.max_speed
+            k2, (self.n_agents,), minval=params.min_speed, maxval=params.max_speed
         )
         agent_headings = jax.random.uniform(
-            k3, (params.n_agents,), minval=0.0, maxval=2 * jnp.pi
+            k3, (self.n_agents,), minval=0.0, maxval=2 * jnp.pi
         )
 
         new_state = EnvState(
@@ -89,13 +96,13 @@ class FlockEnv(environment.Environment):
             time=0,
         )
 
-        return self.get_obs(new_state), new_state
+        return self.get_obs(new_state, params), new_state
 
-    def get_obs(self, state: EnvState) -> chex.Array:
-        pass
+    def get_obs(self, state: EnvState, params: EnvParams) -> chex.Array:
+        raise NotImplementedError
 
     def is_terminal(self, state: EnvState, params: EnvParams) -> chex.Array:
-        return jnp.full((params.n_boids,), False)
+        return jnp.full((self.n_agents,), False)
 
     @property
     def num_actions(self) -> int:
@@ -105,7 +112,7 @@ class FlockEnv(environment.Environment):
         return spaces.Box(-1.0, 1.0, shape=(2,), dtype=jnp.float32)
 
     def observation_space(self, params: EnvParams):
-        pass
+        raise NotImplementedError
 
     def state_space(self, params: EnvParams):
         return spaces.Dict(
