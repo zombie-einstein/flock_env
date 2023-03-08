@@ -20,6 +20,7 @@ chex = "^0.1.6"
 pre-commit = "^2.21.0"
 taskipy = "^1.10.3"
 pytest = "^7.2.1"
+jax-ppo = { git = "git@github.com:zombie-einstein/JAX-PPO", develop=false }
 
 [build-system]
 requires = ["poetry-core"]

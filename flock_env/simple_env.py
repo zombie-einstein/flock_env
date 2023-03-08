@@ -3,15 +3,15 @@ import jax
 import jax.numpy as jnp
 from gymnax.environments import spaces
 
-from flock_env import base_env, utils
+from flock_env import base_env, data_types, utils
 
 
 class SimpleFlockEnv(base_env.BaseFlockEnv):
-    def observation_space(self, params: base_env.EnvParams):
-        return spaces.Box(-1.0, 1.0, shape=(1,), dtype=jnp.float32)
+    def observation_space(self, params: data_types.EnvParams):
+        return spaces.Box(-1.0, 1.0, shape=(3,), dtype=jnp.float32)
 
     def get_obs(
-        self, state: base_env.EnvState, params: base_env.EnvParams
+        self, state: data_types.EnvState, params: data_types.EnvParams
     ) -> chex.Array:
         def inner_obs(x, h, x_flock, h_flock):
             vec_2_flock = utils.shortest_vector(x, x_flock, 1.0)

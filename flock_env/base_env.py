@@ -4,26 +4,9 @@ from typing import Tuple, Union
 import chex
 import jax
 import jax.numpy as jnp
-from flax import struct
 from gymnax.environments import environment, spaces
 
-
-@struct.dataclass
-class EnvState:
-    agent_positions: jnp.array
-    agent_speeds: jnp.array
-    agent_headings: jnp.array
-    time: int
-
-
-@struct.dataclass
-class EnvParams:
-    min_speed: float = 0.01
-    max_speed: float = 0.05
-    max_rotate: float = 0.1
-    max_accelerate: float = 0.025
-    square_range: float = 0.01
-    square_min_range: float = 0.0001
+from flock_env import data_types
 
 
 class BaseFlockEnv(environment.Environment):
@@ -32,16 +15,16 @@ class BaseFlockEnv(environment.Environment):
         self.n_agents = n_agents
 
     @property
-    def default_params(self) -> EnvParams:
-        return EnvParams()
+    def default_params(self) -> data_types.EnvParams:
+        return data_types.EnvParams()
 
     def step_env(
         self,
         key: chex.PRNGKey,
-        state: EnvState,
+        state: data_types.EnvState,
         action: Union[int, float],
-        params: EnvParams,
-    ) -> Tuple[chex.Array, EnvState, float, bool, dict]:
+        params: data_types.EnvParams,
+    ) -> Tuple[chex.Array, data_types.EnvState, float, bool, dict]:
 
         action = jnp.clip(action, a_min=-1.0, a_max=1.0)
 
@@ -60,7 +43,7 @@ class BaseFlockEnv(environment.Environment):
         )
         new_positions = (state.agent_positions + d_pos) % 1.0
 
-        new_state = EnvState(
+        new_state = data_types.EnvState(
             agent_positions=new_positions,
             agent_speeds=new_speeds,
             agent_headings=new_headings,
@@ -68,16 +51,16 @@ class BaseFlockEnv(environment.Environment):
         )
 
         new_obs = self.get_obs(new_state, params)
-        rewards = jax.vmap(self.reward_func, in_axes=(0, None))(
-            new_positions, new_positions
-        )
+        rewards = jax.vmap(self.reward_func, in_axes=(None, 0, None))(
+            params, new_positions, new_positions
+        )[jnp.newaxis]
         dones = self.is_terminal(state, params)
 
         return new_obs, new_state, rewards, dones, dict()
 
     def reset_env(
-        self, key: chex.PRNGKey, params: EnvParams
-    ) -> Tuple[chex.Array, EnvState]:
+        self, key: chex.PRNGKey, params: data_types.EnvParams
+    ) -> Tuple[chex.Array, data_types.EnvState]:
 
         k1, k2, k3 = jax.random.split(key, 3)
 
@@ -89,7 +72,7 @@ class BaseFlockEnv(environment.Environment):
             k3, (self.n_agents,), minval=0.0, maxval=2 * jnp.pi
         )
 
-        new_state = EnvState(
+        new_state = data_types.EnvState(
             agent_positions=agent_positions,
             agent_speeds=agent_speeds,
             agent_headings=agent_headings,
@@ -98,23 +81,27 @@ class BaseFlockEnv(environment.Environment):
 
         return self.get_obs(new_state, params), new_state
 
-    def get_obs(self, state: EnvState, params: EnvParams) -> chex.Array:
+    def get_obs(
+        self, state: data_types.EnvState, params: data_types.EnvParams
+    ) -> chex.Array:
         raise NotImplementedError
 
-    def is_terminal(self, state: EnvState, params: EnvParams) -> chex.Array:
+    def is_terminal(
+        self, state: data_types.EnvState, params: data_types.EnvParams
+    ) -> chex.Array:
         return jnp.full((self.n_agents,), False)
 
     @property
     def num_actions(self) -> int:
         return 2
 
-    def action_space(self, params: EnvParams):
+    def action_space(self, params: data_types.EnvParams):
         return spaces.Box(-1.0, 1.0, shape=(2,), dtype=jnp.float32)
 
-    def observation_space(self, params: EnvParams):
+    def observation_space(self, params: data_types.EnvParams):
         raise NotImplementedError
 
-    def state_space(self, params: EnvParams):
+    def state_space(self, params: data_types.EnvParams):
         return spaces.Dict(
             dict(
                 agent_positions=spaces.Box(0.0, 1.0, (2,), jnp.float32),
