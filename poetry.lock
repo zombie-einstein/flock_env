@@ -501,7 +501,7 @@ jax-tqdm = "^0.1.0"
 type = "git"
 url = "git@github.com:zombie-einstein/JAX-PPO"
 reference = "HEAD"
-resolved_reference = "2b308f6f13fd9de751a66d08e445cbae03606d89"
+resolved_reference = "7f35926e8e39864dff55fab468f3affa1c9fc1db"
 
 [[package]]
 name = "jax-tqdm"

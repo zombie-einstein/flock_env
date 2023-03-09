@@ -21,26 +21,30 @@ def dummy_env():
 @pytest.mark.parametrize(
     "pos, head, expected",
     [
-        ([[0.5, 0.5], [0.6, 0.6], [0.4, 0.6]], [0.0, -jnp.pi, jnp.pi], [0.0, 0.1, 0.0]),
+        (
+            [[0.5, 0.5], [0.6, 0.6], [0.4, 0.6]],
+            [0.0, -jnp.pi, jnp.pi],
+            [0.1, -0.5 * jnp.pi, 0.0],
+        ),
         (
             [[0.5, 0.5], [0.6, 0.6], [0.4, 0.6]],
             [0.0, 0.25 * jnp.pi, 0.25 * jnp.pi],
-            [0.0, 0.1, 0.25 * jnp.pi],
+            [0.1, -0.5 * jnp.pi, 0.25 * jnp.pi],
         ),
         (
             [[0.5, 0.5], [0.6, 0.6], [0.9, 0.9]],
             [0.0, jnp.pi / 2, jnp.pi],
-            [0.1, 0.1, jnp.pi / 2],
+            [jnp.sqrt(2 * jnp.square(0.1)), -0.75 * jnp.pi, jnp.pi / 2],
         ),
         (
             [[0.95, 0.5], [0.05, 0.5], [0.16, 0.5]],
             [0.0, jnp.pi / 2, jnp.pi],
-            [0.1, 0.0, jnp.pi / 2],
+            [0.1, -jnp.pi, jnp.pi / 2],
         ),
         (
             [[0.5, 0.05], [0.5, 0.95], [0.5, 0.5]],
             [0.0, jnp.pi / 2, jnp.pi],
-            [0.0, -0.1, jnp.pi / 2],
+            [0.1, 0.5 * jnp.pi, jnp.pi / 2],
         ),
         (
             [[0.5, 0.05], [0.1, 0.1], [0.9, 0.9]],
@@ -70,5 +74,5 @@ def test_observation(dummy_env, pos, head, expected):
     obs = env.get_obs(s, p)
 
     assert obs.shape == (3, 3)
-    expected = jnp.array([1 / r, 1 / r, 1 / jnp.pi]) * jnp.array(expected)
+    expected = jnp.array([1 / r, 1 / jnp.pi, 1 / jnp.pi]) * jnp.array(expected)
     assert jnp.all(jnp.isclose(obs[0], expected, atol=1e-6))

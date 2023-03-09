@@ -21,10 +21,13 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
 
             def build_obs():
                 dx = range_filter[:, jnp.newaxis] * vec_2_flock
-                dx = jnp.sum(dx, axis=0) / (n_in_range * jnp.sqrt(params.square_range))
+                dx = jnp.sum(dx, axis=0) / n_in_range
+                phi = jnp.arctan2(dx[1], dx[0]) + jnp.pi
+                theta = jnp.sqrt(jnp.sum(jnp.square(dx)) / params.square_range)
+                d_phi = utils.shortest_vector(h, phi, 2 * jnp.pi) / jnp.pi
                 dh = utils.shortest_vector(h, h_flock, 2 * jnp.pi) / jnp.pi
                 dh = jnp.sum(range_filter * dh) / n_in_range
-                return jnp.hstack([dx, dh])
+                return jnp.array([theta, d_phi, dh])
 
             return jax.lax.cond(
                 jnp.greater(n_in_range, 0.0), build_obs, lambda: jnp.zeros((3,))
