@@ -1004,7 +1004,7 @@ jax-tqdm = "^0.1.0"
 
 [package.source]
 type = "git"
-url = "git@github.com:zombie-einstein/JAX-PPO"
+url = "https://github.com/zombie-einstein/JAX-PPO.git"
 reference = "HEAD"
 resolved_reference = "7f35926e8e39864dff55fab468f3affa1c9fc1db"
 
@@ -3135,4 +3135,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "b670100dc46544c46008555efd2283710cdb7f9d8340b02b6b1a5c7d522b757f"
+content-hash = "66ac49bb0b87c1884b5235daca93ba773a178eb29291e8ad373d37b1b77c2a44"
