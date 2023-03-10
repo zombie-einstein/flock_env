@@ -5,6 +5,7 @@ import pytest
 from gymnax.environments import spaces
 
 import flock_env
+from flock_env.base_env import BaseFlockEnv
 
 N_AGENTS = 101
 N_OBS = 5
@@ -15,7 +16,7 @@ def dummy_env():
     def dummy_rewards(*_):
         return jnp.zeros((1,))
 
-    class DummyEnv(flock_env.BaseFlockEnv):
+    class DummyEnv(BaseFlockEnv):
         def __init__(self, n_agents: int):
             super().__init__(dummy_rewards, n_agents)
 
@@ -36,11 +37,11 @@ def env(dummy_env):
 
 
 @pytest.fixture
-def params(env: flock_env.BaseFlockEnv):
+def params(env: BaseFlockEnv):
     return env.default_params
 
 
-def test_reset(params: flock_env.EnvParams, env: flock_env.BaseFlockEnv):
+def test_reset(params: flock_env.EnvParams, env: BaseFlockEnv):
     k = jax.random.PRNGKey(101)
     obs, env_state = env.reset_env(k, params)
 
@@ -72,7 +73,7 @@ def test_reset(params: flock_env.EnvParams, env: flock_env.BaseFlockEnv):
     )
 
 
-def test_update_sequence(params: flock_env.EnvParams, env: flock_env.BaseFlockEnv):
+def test_update_sequence(params: flock_env.EnvParams, env: BaseFlockEnv):
     def step(carry, _):
         k, state = carry
         k1, k2, k3 = jax.random.split(k, num=3)

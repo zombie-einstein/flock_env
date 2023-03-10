@@ -10,6 +10,22 @@ from flock_env import data_types
 
 
 class BaseFlockEnv(environment.Environment):
+    """
+    Base flock environment containing core agent update logic
+
+    Agents continuously update their position (wrapped on a torus).
+    Actions rotate and accelerate individual agent headings and speeds.
+    Agents are initialised to uniformly random initial positions, headings
+    and speeds.
+
+    Args:
+        reward_func: Function used to calculate individual agent
+            rewards, should have the signature ``f(params, x, x_flock)``
+            where ``params`` are environment parameters, ``x`` is the
+            agent position and ``x_flock`` is positions of the whole flock.
+        n_agents (int): Number of agents in the environment.
+    """
+
     def __init__(self, reward_func: typing.Callable, n_agents: int):
         self.reward_func = reward_func
         self.n_agents = n_agents
@@ -69,7 +85,7 @@ class BaseFlockEnv(environment.Environment):
             k2, (self.n_agents,), minval=params.min_speed, maxval=params.max_speed
         )
         agent_headings = jax.random.uniform(
-            k3, (self.n_agents,), minval=0.0, maxval=2 * jnp.pi
+            k3, (self.n_agents,), minval=0.0, maxval=2.0 * jnp.pi
         )
 
         new_state = data_types.EnvState(

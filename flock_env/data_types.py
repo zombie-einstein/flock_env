@@ -1,16 +1,15 @@
-import jax.numpy as jnp
-from flax import struct
+import chex
 
 
-@struct.dataclass
+@chex.dataclass
 class EnvState:
-    agent_positions: jnp.array
-    agent_speeds: jnp.array
-    agent_headings: jnp.array
+    agent_positions: chex.Array
+    agent_speeds: chex.Array
+    agent_headings: chex.Array
     time: int
 
 
-@struct.dataclass
+@chex.dataclass
 class EnvParams:
     min_speed: float = 0.015
     max_speed: float = 0.025
