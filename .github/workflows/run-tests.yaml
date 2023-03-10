@@ -15,4 +15,4 @@ jobs:
           virtualenvs-create: false
           installer-parallel: true
       - run: poetry install
-      - run: pytest -vv
+      - run: pytest -vv tests
