@@ -3,7 +3,7 @@
 Multi-agent RL environment based on Boids, implemented with
 [JAX](https://github.com/google/jax)
 
-![alt text](.github/images/rl_boids001.gif?raw=true)![alt text]
+![alt text](.github/images/rl_boids001.gif?raw=true)
 
 The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
 where agents recreate flocking behaviours based on simple interaction rules.
