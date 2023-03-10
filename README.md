@@ -1,60 +1,55 @@
-# Boid Multi-Agent RL Environment & Multi-Agent RL Agent
+# Flock Multi Agent RL Environment
 
-![alt text](images/009_161.gif?raw=true)![alt text](images/022_081.gif?raw=true)
+Multi-agent RL environment based on Boids, implemented with
+[JAX](https://github.com/google/jax)
 
-## Introduction
+![alt text](../.github/images/rl_boids001.gif?raw=true)![alt text]
 
-This repo contains modules for:
+The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
+where agents recreate flocking behaviours based on simple interaction rules.
+The environment implements boids as a multi-agent reinforcement problem where each
+boids take individual actions and have a unique localised view of the environment.
 
-- A multi-agent RL training environment based on the boid flocking
-model consisting of multiple independent agents (boids) navigating
-the environment alongside other members of the flock. The aim
-being to reproduce the emergent flocking behaviour seen in nature.
-- An experience buffer designed to allow a single RL agent to 
-learn a policy for multiple homogenous agents simultaneously (along with a 
-modified training loop) to be able to generate emergent behaviours.
+This environment has been built around the [gymnax](https://github.com/RobertTLange/gymnax)
+API (a JAX version of the popular RL Gym API).
 
-See `usage.ipynb` for examples of usage of the environment and
-the RL agent. Examples using a DQN have been included, though the environment
-and design of the buffer should be reasonably general.
+## Usage
 
-## Requirements
+See [`examples/ppo_example.ipynb`](/examples/ppo_example.ipynb) for an example
+of training a Proximal-Policy-Optimisation based agent with this environment.
 
-Requirements to use the environment and examples can be found in 
-`requirements.txt`. The model makes use of [numba](https://numba.pydata.org/)
-for performance. 
+The package can and requirements can be installed using [poetry](https://python-poetry.org/docs/)
+by running
 
-## Flock Environment
+```shell
+poetry install
+```
 
-See `flock_env.py`. A RL training environment designed to comply
-with the Open-AI Gym API. The environment itself is based on the 
-[boid model](https://en.wikipedia.org/wiki/Boids) where the flock
-is formed from a set of independent agents (termed boids) who's aim
-is generally to form a close flock whilst avoiding collisions
-alongside possible additional desired (environmental obstacles etc.)
-by altering their trajectory based on the current state of the flock.
+## Previous Version
 
-The environment treats each agent separately, so requires that the 
-actions provided by the RL agent(s) at each step are an 
-array of actions for each agent in the flock, in return the 
-returned observations and rewards also contain values for each
-agent. The observations are local views for each agent, i.e. the 
-locations of other boids relative to that particular agent.
+The previous version of this project built around Numba can be found in
+[`/deprecated`](/deprecated)
 
-Currently the implemented environment `DiscreteActionFlock` is based 
-on a discrete action space where agents 'steer' by fixed amounts 
-at each step and maintain a fixed speed.
+## Developers
 
-The aim is to add a continuous action space version in future 
-iterations alongside additional environmental features.
+### Pre-Commit Hooks
 
-## Multi-Agent Experience Buffer
+Pre commit hooks can be installed by running
 
-See `agent_experience_buffer.py`. This buffer is designed to allow 
-a single RL agent to learn from experience gathered from multiple 
-homogenous agents. The buffer is implemented as 2d arrays in the shape
-`[step][agent]`. At each step the values returned from the multi-agent
-environment are inserted for each agent. 
+```bash
+pre-commit install
+```
 
-Sampling the buffer is done in the same manner as normal RL agents, 
-with sample taken uniformly from the step and agent dimensions.
+Pre-commit checks can then be run using
+
+```bash
+task lint
+```
+
+### Tests
+
+Tests can be run with
+
+```bash
+task test
+```
