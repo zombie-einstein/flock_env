@@ -72,7 +72,13 @@ class BaseFlockEnv(environment.Environment):
         )[jnp.newaxis]
         dones = self.is_terminal(state, params)
 
-        return new_obs, new_state, rewards, dones, dict()
+        return (
+            jax.lax.stop_gradient(new_obs),
+            jax.lax.stop_gradient(new_state),
+            rewards,
+            dones,
+            dict(),
+        )
 
     def reset_env(
         self, key: chex.PRNGKey, params: data_types.EnvParams
