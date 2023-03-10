@@ -8,7 +8,7 @@ Multi-agent RL environment based on Boids, implemented with
 The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
 where agents recreate flocking behaviours based on simple interaction rules.
 The environment implements boids as a multi-agent reinforcement problem where each
-boids take individual actions and have a unique localised view of the environment.
+boid takes individual actions and have a individual localised view of the environment.
 
 This environment has been built around the [gymnax](https://github.com/RobertTLange/gymnax)
 API (a JAX version of the popular RL Gym API).
