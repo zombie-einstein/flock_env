@@ -10,5 +10,6 @@ def exponential_rewards(
 
     d = utils.shortest_distance(x, x_flock, 1.0, norm=False)
     rewards = jnp.where(d < params.square_range, jnp.exp(-40 * jnp.sqrt(d)), 0.0)
+    rewards = jnp.where(d < params.square_min_range, -1.0, rewards)
 
     return jnp.sum(rewards)

@@ -12,9 +12,9 @@ class EnvState:
 
 @struct.dataclass
 class EnvParams:
-    min_speed: float = 0.01
-    max_speed: float = 0.05
-    max_rotate: float = 0.2
-    max_accelerate: float = 0.01
-    square_range: float = 0.01
-    square_min_range: float = 0.0001
+    min_speed: float = 0.015
+    max_speed: float = 0.025
+    max_rotate: float = 0.025
+    max_accelerate: float = 0.001
+    square_range: float = 0.1**2
+    square_min_range: float = 0.01**2
