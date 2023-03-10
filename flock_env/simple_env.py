@@ -7,6 +7,27 @@ from flock_env import base_env, data_types, utils
 
 
 class SimpleFlockEnv(base_env.BaseFlockEnv):
+    """
+    Simple flock environment with observations based on the boids model.
+
+    Agents in this version of the environment receive 3 piece of
+    information as part of their observations:
+
+    - The angle to the centre of mass of the surrounding flock
+    - The distance to the centre of mass of the surrounding flock
+    - The average heading of the surrounding flock
+
+    These reflect the same vectors used in the original boids model to
+    steer the individual agents.
+
+    Attributes:
+        reward_func: Function used to calculate individual agent
+            rewards, should have the signature ``f(params, x, x_flock)``
+            where ``params`` are environment parameters, ``x`` is the
+            agent position and ``x_flock`` is positions of the whole flock.
+        n_agents (int): Number of agents in the environment.
+    """
+
     def observation_space(self, params: data_types.EnvParams):
         return spaces.Box(-1.0, 1.0, shape=(3,), dtype=jnp.float32)
 

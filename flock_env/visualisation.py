@@ -5,7 +5,9 @@ import numpy as np
 from matplotlib import animation
 
 
-def animate_agents(positions: chex.Array, headings: chex.Array, rewards: chex.Array):
+def animate_agents(
+    positions: chex.Array, headings: chex.Array, rewards: chex.Array
+) -> animation.FuncAnimation:
 
     # Scale rewards to use as colours for the plot
     rewards = 255 * (rewards - rewards.min()) / (rewards.max() - rewards.min())
