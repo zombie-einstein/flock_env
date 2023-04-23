@@ -14,7 +14,7 @@ N_OBS = 5
 @pytest.fixture
 def dummy_env():
     def dummy_rewards(*_):
-        return jnp.zeros((1,))
+        return 0
 
     class DummyEnv(BaseFlockEnv):
         def __init__(self, n_agents: int):

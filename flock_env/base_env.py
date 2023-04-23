@@ -1,5 +1,5 @@
 import typing
-from typing import Tuple, Union
+from typing import Tuple
 
 import chex
 import jax
@@ -38,7 +38,7 @@ class BaseFlockEnv(environment.Environment):
         self,
         key: chex.PRNGKey,
         state: data_types.EnvState,
-        action: Union[int, float],
+        action: chex.Array,
         params: data_types.EnvParams,
     ) -> Tuple[chex.Array, data_types.EnvState, float, bool, dict]:
 
@@ -69,7 +69,7 @@ class BaseFlockEnv(environment.Environment):
         new_obs = self.get_obs(new_state, params)
         rewards = jax.vmap(self.reward_func, in_axes=(None, 0, None))(
             params, new_positions, new_positions
-        )[jnp.newaxis]
+        )
         dones = self.is_terminal(state, params)
 
         return (
