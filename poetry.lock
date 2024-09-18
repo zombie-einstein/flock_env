@@ -711,6 +711,35 @@ files = [
 ]
 
 [[package]]
+name = "dotmap"
+version = "1.3.30"
+description = "ordered, dynamically-expandable dot-access dictionary"
+optional = false
+python-versions = "*"
+files = [
+    {file = "dotmap-1.3.30-py3-none-any.whl", hash = "sha256:bd9fa15286ea2ad899a4d1dc2445ed85a1ae884a42effb87c89a6ecce71243c6"},
+    {file = "dotmap-1.3.30.tar.gz", hash = "sha256:5821a7933f075fb47563417c0e92e0b7c031158b4c9a6a7e56163479b658b368"},
+]
+
+[[package]]
+name = "esquilax"
+version = "0.2.0"
+description = "JAX multi-agent simulation and ML toolset"
+optional = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "esquilax-0.2.0-py3-none-any.whl", hash = "sha256:c3b134e5fdd765fc9a5ef3c0c261d7d960c7915093c9b22962d446825eb1c714"},
+    {file = "esquilax-0.2.0.tar.gz", hash = "sha256:23eaf72203a3e907637bb1ab749b7cc06e67f15b1586c01dcff9bc2b35df5258"},
+]
+
+[package.dependencies]
+chex = ">=0.1.86,<0.2.0"
+evosax = ">=0.1.6,<0.2.0"
+flax = ">=0.8.5,<0.9.0"
+jax = ">=0.4.30,<0.5.0"
+jax-tqdm = ">=0.2.1,<0.3.0"
+
+[[package]]
 name = "etils"
 version = "1.9.4"
 description = "Collection of common python utils"
@@ -746,6 +775,27 @@ etree-dm = ["dm-tree", "etils[etree]"]
 etree-jax = ["etils[etree]", "jax[cpu]"]
 etree-tf = ["etils[etree]", "tensorflow"]
 lazy-imports = ["etils[ecolab]"]
+
+[[package]]
+name = "evosax"
+version = "0.1.6"
+description = "JAX-Based Evolution Strategies"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "evosax-0.1.6-py3-none-any.whl", hash = "sha256:195145d68c67f5f1de9c580b6f248f624ac9d089de628e67665f7b3616d638e4"},
+    {file = "evosax-0.1.6.tar.gz", hash = "sha256:bc3dd032191f2f878b08127e0c88d270d08fc95e80b379509b14dc265f29484b"},
+]
+
+[package.dependencies]
+chex = "*"
+dotmap = "*"
+flax = "*"
+jax = "*"
+jaxlib = ">=0.1.37"
+matplotlib = "*"
+numpy = "*"
+pyyaml = "*"
 
 [[package]]
 name = "exceptiongroup"
@@ -1335,24 +1385,25 @@ develop = false
 distrax = "^0.1.5"
 flax = "^0.8.2"
 gymnax = "^0.0.8"
-jax-tqdm = "0.2.0"
+jax = "^0.4.30"
+jax-tqdm = ">=0.2.2"
 scipy = ">=1.13.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/zombie-einstein/JAX-PPO.git"
 reference = "HEAD"
-resolved_reference = "2bdf54d6f0a329490bef46b06b350628febf9130"
+resolved_reference = "856c972afd242c7873083f87b6dc026c9f0e42d3"
 
 [[package]]
 name = "jax-tqdm"
-version = "0.2.0"
+version = "0.2.2"
 description = "Tqdm progress bar for JAX scans and loops"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "jax_tqdm-0.2.0-py3-none-any.whl", hash = "sha256:09c2afabe0804d4f489a49f6b036d5cc0603f2f2e1dcc424506ece8977154af9"},
-    {file = "jax_tqdm-0.2.0.tar.gz", hash = "sha256:466db74e4326af2745d9789c8719309af7a48aacb3e0543a49f42ea169d41c87"},
+    {file = "jax_tqdm-0.2.2-py3-none-any.whl", hash = "sha256:4007ce510e7bc81efc8dd75330f842d4698b8ec5cbd61453f8fe0b237b16af26"},
+    {file = "jax_tqdm-0.2.2.tar.gz", hash = "sha256:178cf14f77c11f1318bd305d14771185aff72fb1a03332e06c78e51cc230f888"},
 ]
 
 [package.dependencies]
@@ -3872,4 +3923,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "859b180ee5758a1afe44c7e988c485a118aa55b8143c15cd82b440dbf1b9c32e"
+content-hash = "3055dd1db539202582073bae7237ea939aae6515188f6988b7d0477cea7e906e"
