@@ -15,5 +15,5 @@ class EnvParams:
     max_speed: float = 0.025
     max_rotate: float = 0.025
     max_accelerate: float = 0.001
-    square_range: float = 0.1**2
     square_min_range: float = 0.01**2
+    collision_penalty: float = 0.1
