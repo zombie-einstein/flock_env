@@ -50,29 +50,28 @@ def test_reset(params: flock_env.EnvParams, env: BaseFlockEnv):
 
     assert isinstance(env_state, flock_env.EnvState)
 
-    assert env_state.agent_positions.shape == (N_AGENTS, 2)
-    assert env_state.agent_headings.shape == (N_AGENTS,)
-    assert env_state.agent_speeds.shape == (N_AGENTS,)
-    assert env_state.time.shape == (N_AGENTS,)
-    assert jnp.array_equal(env_state.time, jnp.zeros((N_AGENTS,), dtype=jnp.int32))
+    assert env_state.boids.position.shape == (N_AGENTS, 2)
+    assert env_state.boids.heading.shape == (N_AGENTS,)
+    assert env_state.boids.speed.shape == (N_AGENTS,)
+    assert env_state.step == 0
     assert obs.shape == (N_AGENTS, N_OBS)
 
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(env_state.agent_positions, 0.0),
-            jnp.less_equal(env_state.agent_positions, 1.0),
+            jnp.greater_equal(env_state.boids.position, 0.0),
+            jnp.less_equal(env_state.boids.position, 1.0),
         )
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(env_state.agent_headings, 0.0),
-            jnp.less_equal(env_state.agent_headings, 2 * jnp.pi),
+            jnp.greater_equal(env_state.boids.heading, 0.0),
+            jnp.less_equal(env_state.boids.heading, 2 * jnp.pi),
         )
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(env_state.agent_speeds, params.min_speed),
-            jnp.less_equal(env_state.agent_speeds, params.max_speed),
+            jnp.greater_equal(env_state.boids.speed, params.min_speed),
+            jnp.less_equal(env_state.boids.speed, params.max_speed),
         )
     )
 
@@ -101,30 +100,30 @@ def test_update_sequence(params: flock_env.EnvParams, env: BaseFlockEnv):
 
     assert isinstance(state_seq, flock_env.EnvState)
 
-    assert state_seq.agent_positions.shape == (n_steps, N_AGENTS, 2)
-    assert state_seq.agent_headings.shape == (n_steps, N_AGENTS)
-    assert state_seq.agent_speeds.shape == (n_steps, N_AGENTS)
+    assert state_seq.boids.position.shape == (n_steps, N_AGENTS, 2)
+    assert state_seq.boids.heading.shape == (n_steps, N_AGENTS)
+    assert state_seq.boids.speed.shape == (n_steps, N_AGENTS)
     assert obs_seq.shape == (n_steps, N_AGENTS, N_OBS)
 
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(state_seq.agent_positions, 0.0),
-            jnp.less_equal(state_seq.agent_positions, 1.0),
+            jnp.greater_equal(state_seq.boids.position, 0.0),
+            jnp.less_equal(state_seq.boids.position, 1.0),
         )
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(state_seq.agent_headings, 0.0),
-            jnp.less_equal(state_seq.agent_headings, 2 * jnp.pi),
+            jnp.greater_equal(state_seq.boids.heading, 0.0),
+            jnp.less_equal(state_seq.boids.heading, 2 * jnp.pi),
         )
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(state_seq.agent_speeds, params.min_speed),
-            jnp.less_equal(state_seq.agent_speeds, params.max_speed),
+            jnp.greater_equal(state_seq.boids.speed, params.min_speed),
+            jnp.less_equal(state_seq.boids.speed, params.max_speed),
         )
     )
-    assert jnp.array_equal(state_seq.time[:, 0], jnp.arange(n_steps) + 1)
+    assert jnp.array_equal(state_seq.step, jnp.arange(n_steps) + 1)
 
 
 def test_movement(dummy_env):
@@ -132,10 +131,12 @@ def test_movement(dummy_env):
 
     k = jax.random.PRNGKey(101)
     s0 = flock_env.EnvState(
-        agent_positions=jnp.array([[0.5, 0.5]]),
-        agent_speeds=jnp.array([0.25]),
-        agent_headings=jnp.array([jnp.pi]),
-        time=jnp.array([0]),
+        boids=flock_env.Boid(
+            position=jnp.array([[0.5, 0.5]]),
+            speed=jnp.array([0.25]),
+            heading=jnp.array([jnp.pi]),
+        ),
+        step=0,
     )
     p = flock_env.EnvParams(
         min_speed=0.1,
@@ -150,7 +151,7 @@ def test_movement(dummy_env):
 
     def step(s, _):
         _, new_state, _, _ = test_env.step(k, p, s, actions)
-        return new_state, s.agent_positions
+        return new_state, s.boids.position
 
     def sub_test(s, expected):
         _, pos_seq = jax.lax.scan(step, s, None, length=5)
@@ -164,9 +165,7 @@ def test_movement(dummy_env):
     )
 
     sub_test(
-        s0.replace(
-            agent_headings=jnp.array([2 * jnp.pi]),
-        ),
+        s0.replace(boids=s0.boids.replace(heading=jnp.array([2 * jnp.pi]))),
         jnp.array(
             [[[0.5, 0.5]], [[0.75, 0.5]], [[0.0, 0.5]], [[0.25, 0.5]], [[0.5, 0.5]]]
         ),
@@ -174,7 +173,9 @@ def test_movement(dummy_env):
 
     sub_test(
         s0.replace(
-            agent_headings=jnp.array([0.5 * jnp.pi]),
+            boids=s0.boids.replace(
+                heading=jnp.array([0.5 * jnp.pi]),
+            )
         ),
         jnp.array(
             [[[0.5, 0.5]], [[0.5, 0.75]], [[0.5, 0.0]], [[0.5, 0.25]], [[0.5, 0.5]]]
@@ -187,10 +188,12 @@ def test_rotation(dummy_env):
 
     k = jax.random.PRNGKey(101)
     s0 = flock_env.EnvState(
-        agent_positions=jnp.array([[0.5, 0.5]]),
-        agent_speeds=jnp.array([0.25]),
-        agent_headings=jnp.array([jnp.pi]),
-        time=jnp.array([0]),
+        boids=flock_env.Boid(
+            position=jnp.array([[0.5, 0.5]]),
+            speed=jnp.array([0.25]),
+            heading=jnp.array([jnp.pi]),
+        ),
+        step=0,
     )
     p = flock_env.EnvParams(
         min_speed=0.1,
@@ -205,7 +208,7 @@ def test_rotation(dummy_env):
 
     def step(s, _):
         _, new_state, _, _ = test_env.step(k, p, s, actions)
-        return new_state, s.agent_positions
+        return new_state, s.boids.position
 
     _, pos_seq = jax.lax.scan(step, s0, None, length=5)
     expected = jnp.array(
@@ -220,10 +223,12 @@ def test_acceleration(dummy_env):
 
     k = jax.random.PRNGKey(101)
     s0 = flock_env.EnvState(
-        agent_positions=jnp.array([[0.0, 0.5]]),
-        agent_speeds=jnp.array([0.0]),
-        agent_headings=jnp.array([0.0]),
-        time=jnp.array([0]),
+        boids=flock_env.Boid(
+            position=jnp.array([[0.0, 0.5]]),
+            speed=jnp.array([0.0]),
+            heading=jnp.array([0.0]),
+        ),
+        step=0,
     )
     p = flock_env.EnvParams(
         min_speed=0.0,
@@ -238,7 +243,7 @@ def test_acceleration(dummy_env):
 
     def step(s, _):
         _, new_state, _, _ = test_env.step(k, p, s, actions)
-        return new_state, s.agent_positions
+        return new_state, s.boids.position
 
     _, pos_seq = jax.lax.scan(step, s0, None, length=5)
     expected = jnp.array(
