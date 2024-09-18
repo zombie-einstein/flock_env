@@ -42,7 +42,7 @@ class BaseFlockEnv(environment.Environment):
         params: data_types.EnvParams,
     ) -> Tuple[chex.Array, data_types.EnvState, float, bool, dict]:
 
-        action = jnp.clip(action, a_min=-1.0, a_max=1.0)
+        action = jnp.clip(action, min=-1.0, max=1.0)
 
         rotations = action[:, 0] * params.max_rotate * jnp.pi
         accelerations = action[:, 1] * params.max_accelerate
@@ -50,8 +50,8 @@ class BaseFlockEnv(environment.Environment):
         new_headings = (state.agent_headings + rotations) % (2 * jnp.pi)
         new_speeds = jnp.clip(
             state.agent_speeds + accelerations,
-            a_min=params.min_speed,
-            a_max=params.max_speed,
+            min=params.min_speed,
+            max=params.max_speed,
         )
 
         d_pos = jax.vmap(lambda a, b: jnp.array([jnp.cos(a) * b, jnp.sin(a) * b]))(
