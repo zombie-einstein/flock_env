@@ -5,7 +5,7 @@ import esquilax
 import jax
 import jax.numpy as jnp
 
-from .data_types import EnvParams, EnvState
+from . import data_types
 
 
 @esquilax.transforms.spatial(
@@ -14,15 +14,18 @@ from .data_types import EnvParams, EnvState
     (0, jnp.zeros(2), 0.0, 0.0),
     include_self=False,
 )
-def observe(_k: chex.PRNGKey, _params: EnvParams, a: EnvState, b: EnvState):
-    dh = esquilax.utils.shortest_vector(
-        a.agent_headings, b.agent_headings, length=2 * jnp.pi
-    )
-    return 1, b.agent_positions, b.agent_speeds, dh
+def observe(
+    _k: chex.PRNGKey,
+    _params: data_types.EnvParams,
+    a: data_types.Boid,
+    b: data_types.Boid,
+):
+    dh = esquilax.utils.shortest_vector(a.heading, b.heading, length=2 * jnp.pi)
+    return 1, b.position, b.speed, dh
 
 
 @esquilax.transforms.amap
-def flatten_observations(_k: chex.PRNGKey, params: EnvParams, observations):
+def flatten_observations(_k: chex.PRNGKey, params: data_types.EnvParams, observations):
     boid, n_nb, x_nb, s_nb, h_nb = observations
 
     def obs_to_nbs():
@@ -30,18 +33,15 @@ def flatten_observations(_k: chex.PRNGKey, params: EnvParams, observations):
         _s_nb = s_nb / n_nb
         _h_nb = h_nb / n_nb
 
-        dx = esquilax.utils.shortest_vector(boid.agent_positions, _x_nb)
+        dx = esquilax.utils.shortest_vector(boid.position, _x_nb)
 
         d = jnp.sqrt(jnp.sum(dx * dx)) / 0.1
 
         phi = jnp.arctan2(dx[1], dx[0]) + jnp.pi
-        d_phi = (
-            esquilax.utils.shortest_vector(boid.agent_headings, phi, 2 * jnp.pi)
-            / jnp.pi
-        )
+        d_phi = esquilax.utils.shortest_vector(boid.heading, phi, 2 * jnp.pi) / jnp.pi
 
         dh = _h_nb / jnp.pi
-        ds = (_s_nb - boid.agent_speeds) / (params.max_speed - params.min_speed)
+        ds = (_s_nb - boid.speed) / (params.max_speed - params.min_speed)
 
         return jnp.array([d, d_phi, dh, ds])
 
@@ -54,15 +54,17 @@ def flatten_observations(_k: chex.PRNGKey, params: EnvParams, observations):
 
 @esquilax.transforms.amap
 def update_velocity(
-    _k: chex.PRNGKey, params: EnvParams, x: Tuple[chex.Array, EnvState]
+    _k: chex.PRNGKey,
+    params: data_types.EnvParams,
+    x: Tuple[chex.Array, data_types.Boid],
 ):
     actions, boid = x
     rotation = actions[0] * params.max_rotate * jnp.pi
     acceleration = actions[1] * params.max_accelerate
 
-    new_heading = (boid.agent_headings + rotation) % (2 * jnp.pi)
+    new_heading = (boid.heading + rotation) % (2 * jnp.pi)
     new_speeds = jnp.clip(
-        boid.agent_speeds + acceleration,
+        boid.speed + acceleration,
         min=params.min_speed,
         max=params.max_speed,
     )
@@ -71,7 +73,7 @@ def update_velocity(
 
 
 @esquilax.transforms.amap
-def move(_key: chex.PRNGKey, _params: EnvParams, x):
+def move(_key: chex.PRNGKey, _params: data_types.EnvParams, x):
     pos, heading, speed = x
     d_pos = jnp.array([speed * jnp.cos(heading), speed * jnp.sin(heading)])
     return (pos + d_pos) % 1.0

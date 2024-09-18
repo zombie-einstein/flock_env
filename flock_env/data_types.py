@@ -2,11 +2,16 @@ import chex
 
 
 @chex.dataclass
+class Boid:
+    position: chex.Array
+    speed: float
+    heading: float
+
+
+@chex.dataclass
 class EnvState:
-    agent_positions: chex.Array
-    agent_speeds: chex.Array
-    agent_headings: chex.Array
-    time: int
+    boids: Boid
+    step: int
 
 
 @chex.dataclass

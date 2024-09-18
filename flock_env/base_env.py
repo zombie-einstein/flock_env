@@ -65,21 +65,23 @@ class BaseFlockEnv(
         """
         k1, k2, k3 = jax.random.split(key, 3)
 
-        agent_positions = jax.random.uniform(k1, (self.n_agents, 2))
-        agent_speeds = jax.random.uniform(
+        positions = jax.random.uniform(k1, (self.n_agents, 2))
+        speeds = jax.random.uniform(
             k2, (self.n_agents,), minval=params.min_speed, maxval=params.max_speed
         )
-        agent_headings = jax.random.uniform(
+        headings = jax.random.uniform(
             k3, (self.n_agents,), minval=0.0, maxval=2.0 * jnp.pi
         )
 
         new_state = data_types.EnvState(
-            agent_positions=agent_positions,
-            agent_speeds=agent_speeds,
-            agent_headings=agent_headings,
-            time=jnp.zeros((self.n_agents,), dtype=jnp.int32),
+            boids=data_types.Boid(
+                position=positions,
+                speed=speeds,
+                heading=headings,
+            ),
+            step=0,
         )
-        obs = self.get_obs(key, params, new_state)
+        obs = self.get_obs(key, params, new_state.boids)
         return obs, new_state
 
     def step(
@@ -123,13 +125,15 @@ class BaseFlockEnv(
             - Agent rewards
             - Terminal flags
         """
-        headings, speeds = steps.update_velocity(key, params, (actions, state))
-        positions = steps.move(key, params, (state.agent_positions, headings, speeds))
+        headings, speeds = steps.update_velocity(key, params, (actions, state.boids))
+        positions = steps.move(key, params, (state.boids.position, headings, speeds))
         state = data_types.EnvState(
-            agent_positions=positions,
-            agent_speeds=speeds,
-            agent_headings=headings,
-            time=state.time + 1,
+            boids=data_types.Boid(
+                position=positions,
+                speed=speeds,
+                heading=headings,
+            ),
+            step=state.step + 1,
         )
         rewards = esquilax.transforms.spatial(
             10,
@@ -140,11 +144,11 @@ class BaseFlockEnv(
         )(self.reward_func)(
             key,
             params,
-            state.agent_positions,
-            state.agent_positions,
-            pos=state.agent_positions,
+            state.boids.position,
+            state.boids.position,
+            pos=state.boids.position,
         )
-        obs = self.get_obs(key, params, state)
+        obs = self.get_obs(key, params, state.boids)
         done = self.is_terminal(params, state)
         return obs, state, rewards, done
 
@@ -152,7 +156,7 @@ class BaseFlockEnv(
         self,
         key: chex.PRNGKey,
         params: data_types.EnvParams,
-        state: data_types.EnvState,
+        boids: data_types.Boid,
     ) -> chex.Array:
         """
         Generate agent observations from current state
@@ -166,8 +170,8 @@ class BaseFlockEnv(
             JAX random key
         params: flock_env.data_types.EnvParams
             Environment parameters
-        state: flock_env.data_types.EnvState
-            Environment state
+        boids: flock_env.data_types.Boid
+            Agent states.
 
         Returns
         -------

@@ -42,11 +42,10 @@ def dummy_env():
 def test_observation(dummy_env, pos, head, expected):
     k = jax.random.PRNGKey(101)
     env = dummy_env(3)
-    s = flock_env.EnvState(
-        agent_positions=jnp.array(pos),
-        agent_speeds=jnp.array([0.0, 0.0, 0.0]),
-        agent_headings=jnp.array(head),
-        time=jnp.array([0, 0, 0]),
+    s = flock_env.Boid(
+        position=jnp.array(pos),
+        speed=jnp.array([0.0, 0.0, 0.0]),
+        heading=jnp.array(head),
     )
     p = flock_env.EnvParams(
         min_speed=0.0,

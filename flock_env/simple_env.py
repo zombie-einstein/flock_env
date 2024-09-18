@@ -51,7 +51,7 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         self,
         key: chex.PRNGKey,
         params: data_types.EnvParams,
-        state: data_types.EnvState,
+        boids: data_types.Boid,
     ) -> chex.Array:
         """
         Generate agent observations from current state
@@ -67,8 +67,8 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
             JAX random key
         params: flock_env.data_types.EnvParams
             Environment parameters
-        state: flock_env.data_types.EnvState
-            Environment state
+        boids: flock_env.data_types.EnvState
+            Boids States
 
         Returns
         -------
@@ -76,7 +76,7 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
             Agent rewards
         """
         n_nb, x_nb, s_nb, h_nb = steps.observe(
-            key, params, state, state, pos=state.agent_positions
+            key, params, boids, boids, pos=boids.position
         )
-        obs = steps.flatten_observations(key, params, (state, n_nb, x_nb, s_nb, h_nb))
+        obs = steps.flatten_observations(key, params, (boids, n_nb, x_nb, s_nb, h_nb))
         return obs
