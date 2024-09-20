@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 import chex
+import distrax
 import esquilax
 import jax.numpy as jnp
 import jax.random
@@ -56,11 +57,19 @@ class PPOAgent(esquilax.ml.rl.Agent):
         key: chex.PRNGKey,
         agent_state: AgentState,
         observations: chex.Array,
+        greedy: bool = False,
     ) -> Tuple[chex.ArrayTree, chex.ArrayTree]:
-        keys = jax.random.split(key, observations.shape[0])
-        _, actions, log_likelihood, value = jax.vmap(
-            lambda k, obs: algos.sample_actions(k, agent_state, obs), in_axes=(0, 0)
-        )(keys, observations)
+
+        if greedy:
+            actions, log_std, value = agent_state.apply(observations)
+            dist = distrax.MultivariateNormalDiag(actions, jnp.exp(log_std))
+            log_likelihood = dist.log_prob(actions)
+        else:
+            keys = jax.random.split(key, observations.shape[0])
+            _, actions, log_likelihood, value = jax.vmap(
+                lambda k, obs: algos.sample_actions(k, agent_state, obs), in_axes=(0, 0)
+            )(keys, observations)
+
         return actions, dict(log_likelihood=log_likelihood, value=value)
 
     def update(

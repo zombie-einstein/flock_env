@@ -47,6 +47,14 @@ def test_agent():
     assert values["log_likelihood"].shape == (n_agents,)
     assert values["value"].shape == (n_agents,)
 
+    actions, values = agent.sample_actions(key, agent_state, observations, greedy=True)
+
+    assert actions.shape == (n_agents, n_actions)
+    assert isinstance(values, dict)
+    assert sorted(values.keys()) == ["log_likelihood", "value"]
+    assert values["log_likelihood"].shape == (n_agents,)
+    assert values["value"].shape == (n_agents,)
+
     updated_agent, rewards, losses = rl.train(
         key,
         agent,
