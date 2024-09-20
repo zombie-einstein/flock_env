@@ -723,13 +723,13 @@ files = [
 
 [[package]]
 name = "esquilax"
-version = "0.2.1"
+version = "0.2.2"
 description = "JAX multi-agent simulation and ML toolset"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "esquilax-0.2.1-py3-none-any.whl", hash = "sha256:502b2639441dd4636f8efa74789227ef7b0c977032de53be53e74990fe7ae01c"},
-    {file = "esquilax-0.2.1.tar.gz", hash = "sha256:b17d29c87da07ac05fb528afd818d14985201a2c6c251779a91fbf9d360b9939"},
+    {file = "esquilax-0.2.2-py3-none-any.whl", hash = "sha256:1d9305c6075520714b047c94ea93920465d248a1eb80d0e6d9c589702fe64c9f"},
+    {file = "esquilax-0.2.2.tar.gz", hash = "sha256:aea96e8601aa79281c5679201c494e89a45b4512b0d002845b4ed28d1722b507"},
 ]
 
 [package.dependencies]
@@ -2796,13 +2796,13 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "prometheus-client"
-version = "0.20.0"
+version = "0.21.0"
 description = "Python client for the Prometheus monitoring system."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "prometheus_client-0.20.0-py3-none-any.whl", hash = "sha256:cde524a85bce83ca359cc837f28b8c0db5cac7aa653a588fd7e84ba061c329e7"},
-    {file = "prometheus_client-0.20.0.tar.gz", hash = "sha256:287629d00b147a32dcb2be0b9df905da599b2d82f80377083ec8463309a4bb89"},
+    {file = "prometheus_client-0.21.0-py3-none-any.whl", hash = "sha256:4fa6b4dd0ac16d58bb587c04b1caae65b8c5043e85f778f42f5f632f6af2e166"},
+    {file = "prometheus_client-0.21.0.tar.gz", hash = "sha256:96c83c606b71ff2b0a433c98889d275f51ffec6c5e267de37c7a2b5c9aa9233e"},
 ]
 
 [package.extras]
@@ -3924,4 +3924,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "c32076e4514639b862a03b0361c534c5d2a5e91543cae15319c2cb0c890a8b08"
+content-hash = "a3f6abf5c06a83bd59d474dd8ffa90bc2e255aa123878588cc28cff04741a070"
