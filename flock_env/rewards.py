@@ -14,8 +14,8 @@ def exponential_rewards(
 
     reward = jax.lax.cond(
         d < params.square_min_range,
-        lambda _d: -1.0,
-        lambda _d: jnp.exp(-40 * jnp.sqrt(_d)),
+        lambda _d: -params.collision_penalty,
+        lambda _d: jnp.exp(-50 * jnp.sqrt(_d)),
         d,
     )
 

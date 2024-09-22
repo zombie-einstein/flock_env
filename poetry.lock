@@ -13,13 +13,13 @@ files = [
 
 [[package]]
 name = "anyio"
-version = "4.5.0"
+version = "4.6.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "anyio-4.5.0-py3-none-any.whl", hash = "sha256:fdeb095b7cc5a5563175eedd926ec4ae55413bb4be5770c424af0ba46ccb4a78"},
-    {file = "anyio-4.5.0.tar.gz", hash = "sha256:c5a275fe5ca0afd788001f58fca1e69e29ce706d746e317d660e21f70c530ef9"},
+    {file = "anyio-4.6.0-py3-none-any.whl", hash = "sha256:c7d2e9d63e31599eeb636c8c5c03a7e108d73b345f064f1c19fdc87b79036a9a"},
+    {file = "anyio-4.6.0.tar.gz", hash = "sha256:137b4559cbb034c477165047febb6ff83f390fc3b20bf181c1fc0a728cb8beeb"},
 ]
 
 [package.dependencies]
@@ -723,13 +723,13 @@ files = [
 
 [[package]]
 name = "esquilax"
-version = "0.2.2"
+version = "0.2.3"
 description = "JAX multi-agent simulation and ML toolset"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "esquilax-0.2.2-py3-none-any.whl", hash = "sha256:1d9305c6075520714b047c94ea93920465d248a1eb80d0e6d9c589702fe64c9f"},
-    {file = "esquilax-0.2.2.tar.gz", hash = "sha256:aea96e8601aa79281c5679201c494e89a45b4512b0d002845b4ed28d1722b507"},
+    {file = "esquilax-0.2.3-py3-none-any.whl", hash = "sha256:7b138e9ca92a373e45d9f8ca9a11655f045a3ea4e4e875a3488254934e2418c5"},
+    {file = "esquilax-0.2.3.tar.gz", hash = "sha256:55ecf24e5f43695304c8750d892181ada88dba708c6ee815269c93cd7bab889f"},
 ]
 
 [package.dependencies]
@@ -3924,4 +3924,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "a3f6abf5c06a83bd59d474dd8ffa90bc2e255aa123878588cc28cff04741a070"
+content-hash = "08e7c6c01b5f1528268e40eba3e285c82de0974492b3440131ad04d7771bce67"
