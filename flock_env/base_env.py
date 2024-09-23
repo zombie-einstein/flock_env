@@ -82,7 +82,7 @@ class BaseFlockEnv(
             step=0,
         )
         obs = self.get_obs(key, params, new_state.boids)
-        return obs, new_state
+        return jax.lax.stop_gradient((obs, new_state))
 
     def step(
         self,
@@ -151,7 +151,7 @@ class BaseFlockEnv(
         )
         obs = self.get_obs(key, params, state.boids)
         done = self.is_terminal(params, state)
-        return obs, state, rewards, done
+        return jax.lax.stop_gradient((obs, state, rewards, done))
 
     def get_obs(
         self,

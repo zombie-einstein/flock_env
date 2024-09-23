@@ -3,7 +3,7 @@
 **Multi-agent RL environment based on Boids, implemented with
 [JAX](https://github.com/google/jax) using [Esquilax](https://zombie-einstein.github.io/esquilax/)**
 
-![alt text](.github/images/rl_boids001.gif?raw=true)
+![boids animation](.github/images/rl_boids001.gif?raw=true)
 
 The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
 where agents recreate flocking behaviours based on simple interaction rules.
@@ -40,10 +40,12 @@ new_obs, new_state, rewards, dones = env.step(
 ## Usage
 
 See [`examples/ppo_example.ipynb`](/examples/ppo_example.ipynb) for an example
-of training a Proximal-Policy-Optimisation based agent with this environment
-(using my [JAX implementation of PPO](https://github.com/zombie-einstein/JAX-PPO)).
+of training a Proximal-Policy-Optimisation agent with this environment
+using a [JAX implementation of PPO](https://github.com/zombie-einstein/JAX-PPO)
+and Esquilax's built-in
+[RL training functionality](https://zombie-einstein.github.io/esquilax/autoapi/esquilax/ml/rl/index.html).
 
-The package can and requirements can be installed using [poetry](https://python-poetry.org/docs/)
+The package and requirements can be installed using [poetry](https://python-poetry.org/docs/)
 by running
 
 ```shell

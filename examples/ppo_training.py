@@ -30,6 +30,64 @@ def training(
     ppo_params: Optional[jax_ppo.PPOParams] = None,
     show_progress: bool = True,
 ):
+    """
+    Train and test boid PPO policy
+
+    Parameters
+    ----------
+    rng
+        Jax random key or random seed
+    n_agents
+        Number of boids to simulate
+    n_train_steps
+        Number of training updates (i.e.
+        number of times we sample trajectories)
+    test_every
+        Number of steps between policy tests
+    n_env_steps
+        Number of steps to run the environment
+        each step
+    n_train_env
+        Number of environments to simultaneously
+        collect samples from each step
+    n_test_env
+        Number of environments to run simultaneously
+        during testing
+    n_update_epochs
+        Number of policy update within each
+        training step
+    mini_batch_size
+        Mini-batch size to sample each update
+    max_mini_batches
+        Maximum number of mini-batches to use
+    training_schedule
+        Either a float learning-rate, or optax
+        learning rate schedule
+    network_layer_width
+        Width of PPO policy-network layers
+    n_network_layers
+        Number of PPO policy network layers
+    env_params
+        Optional flock environment parameters. If
+        not provided default parameters will be
+        used
+    ppo_params
+        Optional ppo agent parameters. If
+        not provided default parameters will be
+        used
+    show_progress
+        If ``True``  tqdm progres bar will be displayed
+
+    Returns
+    -------
+    tuple
+        Tuple containing:
+
+        - Rewards generated over training
+        - Training losses
+        - Rewards recorded during training
+        - Environment states recorded during training
+    """
     assert n_train_steps % test_every == 0
 
     key = rng if isinstance(rng, chex.PRNGKey) else jax.random.PRNGKey(rng)
