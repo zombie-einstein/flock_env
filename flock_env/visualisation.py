@@ -6,7 +6,10 @@ from matplotlib import animation
 
 
 def animate_agents(
-    positions: chex.Array, headings: chex.Array, rewards: chex.Array
+    positions: chex.Array,
+    headings: chex.Array,
+    rewards: chex.Array,
+    cmap: str = "winter",
 ) -> animation.FuncAnimation:
 
     # Scale rewards to use as colours for the plot
@@ -34,7 +37,7 @@ def animate_agents(
         jnp.cos(d[0][2]),
         jnp.sin(d[0][2]),
         d[0][3],
-        cmap=plt.get_cmap("winter"),
+        cmap=plt.get_cmap(cmap),
     )
 
     def update_quiver(f):

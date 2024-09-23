@@ -82,7 +82,7 @@ class BaseFlockEnv(
             step=0,
         )
         obs = self.get_obs(key, params, new_state.boids)
-        return obs, new_state
+        return jax.lax.stop_gradient((obs, new_state))
 
     def step(
         self,
@@ -125,6 +125,7 @@ class BaseFlockEnv(
             - Agent rewards
             - Terminal flags
         """
+        actions = jnp.clip(actions, min=-1.0, max=1.0)
         headings, speeds = steps.update_velocity(key, params, (actions, state.boids))
         positions = steps.move(key, params, (state.boids.position, headings, speeds))
         state = data_types.EnvState(
@@ -138,7 +139,7 @@ class BaseFlockEnv(
         rewards = esquilax.transforms.spatial(
             10,
             jnp.add,
-            -1.0,
+            0.0,
             include_self=False,
             topology="moore",
         )(self.reward_func)(
@@ -150,7 +151,7 @@ class BaseFlockEnv(
         )
         obs = self.get_obs(key, params, state.boids)
         done = self.is_terminal(params, state)
-        return obs, state, rewards, done
+        return jax.lax.stop_gradient((obs, state, rewards, done))
 
     def get_obs(
         self,
