@@ -6,11 +6,11 @@ import esquilax
 import jax.numpy as jnp
 import jax.random
 import jax_ppo
-import numpy as np
 import optax
 from esquilax.ml.rl import AgentState, Trajectory
 from flax import linen as nn
 from jax_ppo.mlp import algos, policy
+from jax_ppo.training import train_step_with_refresh
 
 
 class PPOAgent(esquilax.ml.rl.Agent):
@@ -88,41 +88,25 @@ class PPOAgent(esquilax.ml.rl.Agent):
             reward=trajectories.rewards,
             done=trajectories.done,
         )
-        # Calculate GAE etc from individual agent trajectories
-        batches = jax.vmap(
-            lambda x: jax.vmap(
-                jax_ppo.mlp.algos.prepare_batch,
-                in_axes=(
-                    None,
-                    1,
-                ),
-            )(self.params, x),
-            in_axes=(0,),
-        )(trajectories)
-        batches = jax.tree_util.tree_map(
-            lambda x: jnp.reshape(x, (np.prod(x.shape[:3]),) + x.shape[3:]), batches
+
+        # Reshape trajectories into individual agent histories
+        def reshape(x):
+            x = jnp.swapaxes(x, 1, 2)
+            x = jnp.reshape(x, (x.shape[0] * x.shape[1],) + x.shape[2:])
+            return x
+
+        trajectories = jax.tree.map(reshape, trajectories)
+
+        _, agent_state, losses = train_step_with_refresh(
+            jax_ppo.mlp.algos.prepare_batch,
+            key,
+            self.update_epochs,
+            self.mini_batch_size,
+            self.max_mini_batches,
+            self.params,
+            trajectories,
+            agent_state,
         )
-        batch_size = batches.state.shape[0]
-        n_samples = batch_size - (batch_size % self.mini_batch_size)
-        n_samples = min(n_samples, self.max_mini_batches * self.mini_batch_size)
-
-        def inner_update(carry, _):
-            _key, _agent = carry
-            _key, _sub_key = jax.random.split(_key)
-            _idxs = jax.random.choice(_sub_key, batch_size, (n_samples,), replace=False)
-            _batch = jax.tree_util.tree_map(lambda y: y.at[_idxs].get(), batches)
-            _agent, _losses = jax_ppo.training.policy_update(
-                agent=_agent,
-                ppo_params=self.params,
-                batch=_batch,
-                batch_size=self.mini_batch_size,
-            )
-            return (_key, _agent), _losses
-
-        (_, agent_state), losses = jax.lax.scan(
-            inner_update, (key, agent_state), None, length=self.update_epochs
-        )
-
         losses = jax.tree_util.tree_map(jnp.ravel, losses)
 
         agent_state = AgentState(
