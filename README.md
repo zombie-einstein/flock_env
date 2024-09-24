@@ -54,7 +54,6 @@ poetry install
 
 ## TODO
 
-- More complex observation spaces, e.g. ray-casting view model
 - Objects/obstacles in the environment
 
 ## Previous Version

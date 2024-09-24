@@ -29,6 +29,8 @@ def training(
     env_params: Optional[flock_env.EnvParams] = None,
     ppo_params: Optional[jax_ppo.PPOParams] = None,
     show_progress: bool = True,
+    env_type=flock_env.SimpleFlockEnv,
+    **env_kwargs,
 ):
     """
     Train and test boid PPO policy
@@ -77,6 +79,8 @@ def training(
         used
     show_progress
         If ``True``  tqdm progres bar will be displayed
+    env_type
+        Environment type to initialise
 
     Returns
     -------
@@ -93,9 +97,10 @@ def training(
     key = rng if isinstance(rng, chex.PRNGKey) else jax.random.PRNGKey(rng)
     k_init, k_train = jax.random.split(key, 2)
 
-    env = flock_env.SimpleFlockEnv(
+    env = env_type(
         reward_func=flock_env.rewards.exponential_rewards,
         n_agents=n_agents,
+        **env_kwargs,
     )
 
     if env_params is None:

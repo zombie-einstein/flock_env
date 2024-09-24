@@ -103,7 +103,7 @@ def vision_model(n: int, n_bins=10):
         )
         dx = esquilax.utils.shortest_vector(a.position, b.position)
         d = jnp.sqrt(jnp.sum(dx * dx))
-        phi = jnp.arctan2(dx[1], dx[0])
+        phi = jnp.arctan2(dx[1], dx[0]) % (2 * jnp.pi)
         dh = esquilax.utils.shortest_vector(phi, a.heading, 2 * jnp.pi)
 
         angular_width = jnp.arctan2(params.agent_radius, d)
