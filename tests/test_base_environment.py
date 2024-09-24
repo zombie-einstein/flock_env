@@ -143,7 +143,7 @@ def test_movement(dummy_env):
         max_speed=0.25,
         max_rotate=0.5,
         max_accelerate=0.1,
-        square_min_range=0.0001,
+        agent_radius=0.01,
         collision_penalty=0.1,
     )
 
@@ -200,7 +200,7 @@ def test_rotation(dummy_env):
         max_speed=0.25,
         max_rotate=0.5,
         max_accelerate=0.1,
-        square_min_range=0.0001,
+        agent_radius=0.01,
         collision_penalty=0.1,
     )
 
@@ -235,7 +235,7 @@ def test_acceleration(dummy_env):
         max_speed=0.5,
         max_rotate=0.5,
         max_accelerate=0.1,
-        square_min_range=0.0001,
+        agent_radius=0.01,
         collision_penalty=0.1,
     )
 
