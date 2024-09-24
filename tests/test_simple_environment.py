@@ -52,7 +52,7 @@ def test_observation(dummy_env, pos, head, expected):
         max_speed=0.5,
         max_rotate=0.5,
         max_accelerate=0.1,
-        square_min_range=0.0001,
+        agent_radius=0.01,
         collision_penalty=0.1,
     )
 
