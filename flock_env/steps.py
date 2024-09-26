@@ -10,49 +10,85 @@ from . import data_types
 
 @esquilax.transforms.spatial(
     10,
-    (jnp.add, jnp.add, jnp.add, jnp.add),
-    (0, jnp.zeros(2), 0.0, 0.0),
+    data_types.Observation(
+        n_flock=jnp.add,
+        pos=jnp.add,
+        speed=jnp.add,
+        heading=jnp.add,
+        n_coll=jnp.add,
+        pos_coll=jnp.add,
+    ),
+    data_types.Observation(),
     include_self=False,
 )
 def observe(
     _k: chex.PRNGKey,
-    _params: data_types.EnvParams,
+    params: data_types.EnvParams,
     a: data_types.Boid,
     b: data_types.Boid,
 ):
     dh = esquilax.utils.shortest_vector(a.heading, b.heading, length=2 * jnp.pi)
-    return 1, b.position, b.speed, dh
+    d = esquilax.utils.shortest_distance(a.position, b.position, norm=True)
+    is_close, close_pos = jax.lax.cond(
+        d < 2 * params.agent_radius,
+        lambda: (1, b.position),
+        lambda: (0, jnp.zeros(2)),
+    )
+
+    return data_types.Observation(
+        n_flock=1,
+        pos=b.position,
+        speed=b.speed,
+        heading=dh,
+        n_coll=is_close,
+        pos_coll=close_pos,
+    )
 
 
 @esquilax.transforms.amap
-def flatten_observations(_k: chex.PRNGKey, params: data_types.EnvParams, observations):
-    boid, n_nb, x_nb, s_nb, h_nb = observations
+def flatten_observations(
+    _k: chex.PRNGKey,
+    params: data_types.EnvParams,
+    observations: Tuple[data_types.Boid, data_types.Observation],
+):
+    boid, obs = observations
 
-    def obs_to_nbs():
-        _x_nb = x_nb / n_nb
-        _s_nb = s_nb / n_nb
-        _h_nb = h_nb / n_nb
-
-        dx = esquilax.utils.shortest_vector(boid.position, _x_nb)
-
+    def vec_to_polar(dx):
         d = jnp.sqrt(jnp.sum(dx * dx)) / 0.1
-
         phi = jnp.arctan2(dx[1], dx[0]) + jnp.pi
         d_phi = (
             esquilax.utils.shortest_vector(boid.heading, phi, length=2 * jnp.pi)
             / jnp.pi
         )
+        return d, d_phi
 
+    def obs_to_nbs():
+        _x_nb = obs.pos / obs.n_flock
+        _s_nb = obs.speed / obs.n_flock
+        _h_nb = obs.heading / obs.n_flock
+        dx = esquilax.utils.shortest_vector(boid.position, _x_nb)
+        d, d_phi = vec_to_polar(dx)
         dh = _h_nb / jnp.pi
         ds = (_s_nb - boid.speed) / (params.max_speed - params.min_speed)
 
         return jnp.array([d, d_phi, dh, ds])
 
-    return jax.lax.cond(
-        n_nb > 0,
+    def obs_to_collision():
+        _x_close = obs.pos_coll / obs.n_coll
+        dx = esquilax.utils.shortest_vector(boid.position, _x_close)
+        d, d_phi = vec_to_polar(dx)
+        return jnp.array([d, d_phi])
+
+    flock_obs = jax.lax.cond(
+        obs.n_flock > 0,
         obs_to_nbs,
         lambda: jnp.array([-1.0, 0.0, 0.0, -1.0]),
     )
+    coll_obs = jax.lax.cond(
+        obs.n_coll > 0, obs_to_collision, lambda: jnp.array([-1.0, 0.0])
+    )
+
+    return jnp.concat([flock_obs, coll_obs])
 
 
 @esquilax.transforms.amap

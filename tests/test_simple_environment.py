@@ -41,7 +41,9 @@ def dummy_env():
 )
 def test_observation(dummy_env, pos, head, expected):
     k = jax.random.PRNGKey(101)
-    env = dummy_env(3)
+    n_agents = 3
+    env = dummy_env(n_agents)
+    n_obs = env.observation_space(env.default_params()).shape[0]
     s = flock_env.Boid(
         position=jnp.array(pos),
         speed=jnp.array([0.0, 0.0, 0.0]),
@@ -58,6 +60,6 @@ def test_observation(dummy_env, pos, head, expected):
 
     obs = env.get_obs(k, p, s)
 
-    assert obs.shape == (3, 4)
+    assert obs.shape == (n_agents, n_obs)
     expected = jnp.array([1, 1 / jnp.pi, 1 / jnp.pi, 1.0]) * jnp.array(expected)
-    assert jnp.all(jnp.isclose(obs[0], expected, atol=1e-6))
+    assert jnp.all(jnp.isclose(obs[0, :4], expected, atol=1e-6))

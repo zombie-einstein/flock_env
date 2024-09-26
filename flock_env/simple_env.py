@@ -45,7 +45,7 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         gymnax.spaces.Space
             Observation space description
         """
-        return spaces.Box(-1.0, 1.0, shape=(4,), dtype=jnp.float32)
+        return spaces.Box(-1.0, 1.0, shape=(6,), dtype=jnp.float32)
 
     def get_obs(
         self,
@@ -75,8 +75,6 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         chex.Array
             Agent rewards
         """
-        n_nb, x_nb, s_nb, h_nb = steps.observe(
-            key, params, boids, boids, pos=boids.position
-        )
-        obs = steps.flatten_observations(key, params, (boids, n_nb, x_nb, s_nb, h_nb))
+        observations = steps.observe(key, params, boids, boids, pos=boids.position)
+        obs = steps.flatten_observations(key, params, (boids, observations))
         return obs
