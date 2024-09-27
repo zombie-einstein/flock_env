@@ -723,13 +723,13 @@ files = [
 
 [[package]]
 name = "esquilax"
-version = "0.3.0"
+version = "0.3.1"
 description = "JAX multi-agent simulation and ML toolset"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "esquilax-0.3.0-py3-none-any.whl", hash = "sha256:54f0634c75ee701d01165bd148dc2ed261f47997deb74687466a5fbf18f7ec32"},
-    {file = "esquilax-0.3.0.tar.gz", hash = "sha256:e32f7b882fdc182584ec0e1bec1fb0a2d724e72ebfdfc56ba481205af15a5bee"},
+    {file = "esquilax-0.3.1-py3-none-any.whl", hash = "sha256:72f0555a31f91c002e0d47b8ae82b1dc1b85c3b580aeba932a29be77497213d2"},
+    {file = "esquilax-0.3.1.tar.gz", hash = "sha256:8c0b863caaa11fb2ded1414111b5eb1b966371578c328b97dd2c5e4fd8f5c8d0"},
 ]
 
 [package.dependencies]
@@ -2450,21 +2450,14 @@ files = [
 
 [[package]]
 name = "opt-einsum"
-version = "3.3.0"
-description = "Optimizing numpys einsum function"
+version = "3.4.0"
+description = "Path optimization of einsum functions."
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.8"
 files = [
-    {file = "opt_einsum-3.3.0-py3-none-any.whl", hash = "sha256:2455e59e3947d3c275477df7f5205b30635e266fe6dc300e3d9f9646bfcea147"},
-    {file = "opt_einsum-3.3.0.tar.gz", hash = "sha256:59f6475f77bbc37dcf7cd748519c0ec60722e91e63ca114e68821c0c54a46549"},
+    {file = "opt_einsum-3.4.0-py3-none-any.whl", hash = "sha256:69bb92469f86a1565195ece4ac0323943e83477171b91d24c35afe028a90d7cd"},
+    {file = "opt_einsum-3.4.0.tar.gz", hash = "sha256:96ca72f1b886d148241348783498194c577fa30a8faac108586b14f1ba4473ac"},
 ]
-
-[package.dependencies]
-numpy = ">=1.7"
-
-[package.extras]
-docs = ["numpydoc", "sphinx (==1.2.3)", "sphinx-rtd-theme", "sphinxcontrib-napoleon"]
-tests = ["pytest", "pytest-cov", "pytest-pep8"]
 
 [[package]]
 name = "optax"
@@ -3930,4 +3923,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "d0b1d1b30791e1e1f1bb208922e2816a927f382e8325a9f568c8c54a5e6dd8d5"
+content-hash = "c2f74ecf1589fcefd39e6ae28cc2b32f95b00efc90076122f74e6d8da9872ab9"

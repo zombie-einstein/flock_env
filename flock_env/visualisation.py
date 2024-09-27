@@ -10,6 +10,7 @@ def animate_agents(
     headings: chex.Array,
     rewards: chex.Array,
     cmap: str = "winter",
+    border: float = 0.01,
 ) -> animation.FuncAnimation:
 
     # Scale rewards to use as colours for the plot
@@ -24,8 +25,15 @@ def animate_agents(
     )
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+    fig.subplots_adjust(
+        top=1.0 - border,
+        bottom=border,
+        right=1.0 - border,
+        left=border,
+        hspace=0,
+        wspace=0,
+    )
 
-    plt.tight_layout()
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_xlim(0, 1)
@@ -38,6 +46,7 @@ def animate_agents(
         jnp.sin(d[0][2]),
         d[0][3],
         cmap=plt.get_cmap(cmap),
+        pivot="middle",
     )
 
     def update_quiver(f):
