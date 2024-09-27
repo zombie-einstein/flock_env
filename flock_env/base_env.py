@@ -136,19 +136,15 @@ class BaseFlockEnv(
             ),
             step=state.step + 1,
         )
-        rewards = esquilax.transforms.spatial(
-            10,
-            jnp.add,
-            0.0,
-            include_self=False,
-            topology="moore",
-        )(self.reward_func)(
+        collisions, rewards = steps.rewards(
             key,
             params,
-            state.boids.position,
-            state.boids.position,
+            state.boids,
+            state.boids,
             pos=state.boids.position,
+            f=self.reward_func,
         )
+        rewards = jnp.where(collisions > 0, -params.collision_penalty, rewards)
         obs = self.get_obs(key, params, state.boids)
         done = self.is_terminal(params, state)
         return jax.lax.stop_gradient((obs, state, rewards, done))
