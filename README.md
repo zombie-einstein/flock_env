@@ -4,8 +4,8 @@
 [JAX](https://github.com/google/jax) using [Esquilax](https://zombie-einstein.github.io/esquilax/)**
 
 <p float="left">
-  <img src=".github/images/rl_boids001.gif?raw=true" width="200" />
-  <img src=".github/images/rl_boids002.gif?raw=true" width="200" />
+  <img src=".github/images/rl_boids001.gif?raw=true" width="400" />
+  <img src=".github/images/rl_boids002.gif?raw=true" width="400" />
 </p>
 
 The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
