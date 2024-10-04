@@ -3,7 +3,10 @@
 **Multi-agent RL environment based on Boids, implemented with
 [JAX](https://github.com/google/jax) using [Esquilax](https://zombie-einstein.github.io/esquilax/)**
 
-![boids animation](.github/images/rl_boids001.gif?raw=true)
+<p float="left">
+  <img src=".github/images/rl_boids001.gif?raw=true" width="200" />
+  <img src=".github/images/rl_boids002.gif?raw=true" width="200" />
+</p>
 
 The environment is based on popular [boids model](https://en.wikipedia.org/wiki/Boids)
 where agents recreate flocking behaviours based on simple interaction rules.
