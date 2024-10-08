@@ -18,7 +18,7 @@ def dummy_env():
 
     class DummyEnv(BaseFlockEnv):
         def __init__(self, n_agents: int):
-            super().__init__(dummy_rewards, n_agents)
+            super().__init__(dummy_rewards, n_agents, 0.1)
 
         def get_obs(
             self,

@@ -56,6 +56,7 @@ def test_observation(pos, heading, expected):
     env = flock_env.VisionEnv(
         lambda *_: 10.0,
         N_AGENTS,
+        0.1,
         n_view=N_VIEW,
     )
     params = env.default_params()

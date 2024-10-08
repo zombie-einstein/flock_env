@@ -18,6 +18,7 @@ def test_agent():
     env = flock_env.SimpleFlockEnv(
         reward_func=flock_env.rewards.exponential_rewards,
         n_agents=n_agents,
+        i_range=0.1,
     )
     env_params = env.default_params()
     obs_shape = env.observation_space(env_params).shape
