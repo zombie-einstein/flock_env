@@ -29,11 +29,14 @@ class BaseFlockEnv(
         agent position and ``y`` is positions of another agent.
     n_agents: int
         Number of agents in the environment.
+    i_range: float
+        Agent interaction range.
     """
 
-    def __init__(self, reward_func: typing.Callable, n_agents: int):
+    def __init__(self, reward_func: typing.Callable, n_agents: int, i_range: float):
         self.reward_func = reward_func
         self.n_agents = n_agents
+        self.i_range = i_range
 
     def default_params(self) -> data_types.EnvParams:
         """
@@ -136,7 +139,7 @@ class BaseFlockEnv(
             ),
             step=state.step + 1,
         )
-        collisions, rewards = steps.rewards(
+        collisions, rewards = steps.rewards(self.i_range)(
             key,
             params,
             state.boids,

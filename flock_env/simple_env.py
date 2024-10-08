@@ -29,6 +29,8 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         agent position and ``y`` is positions of another agent.
     n_agents: int
         Number of agents in the environment.
+    i_range: float
+        Agent interaction range.
     """
 
     def observation_space(self, params: data_types.EnvParams) -> spaces.Space:
@@ -75,6 +77,10 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         chex.Array
             Agent rewards
         """
-        observations = steps.observe(key, params, boids, boids, pos=boids.position)
-        obs = steps.flatten_observations(key, params, (boids, observations))
+        observations = steps.observe(self.i_range)(
+            key, params, boids, boids, pos=boids.position
+        )
+        obs = steps.flatten_observations(self.i_range)(
+            key, params, (boids, observations)
+        )
         return obs

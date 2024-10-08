@@ -8,7 +8,7 @@ def test_example():
 
     # Initialise a flock environment with 10 agents
     env = flock_env.SimpleFlockEnv(
-        reward_func=flock_env.rewards.exponential_rewards, n_agents=10
+        reward_func=flock_env.rewards.exponential_rewards, n_agents=10, i_range=0.1
     )
     env_params = env.default_params()
 

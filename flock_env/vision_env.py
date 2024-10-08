@@ -34,9 +34,11 @@ class VisionEnv(base_env.BaseFlockEnv):
     n_view: int
     """
 
-    def __init__(self, reward_func: Callable, n_agents: int, n_view: int = 10):
+    def __init__(
+        self, reward_func: Callable, n_agents: int, i_range: float, n_view: int = 10
+    ):
         self.n_view = n_view
-        super().__init__(reward_func, n_agents)
+        super().__init__(reward_func, n_agents, i_range)
 
     def observation_space(self, params: data_types.EnvParams) -> spaces.Space:
         """
@@ -77,7 +79,7 @@ class VisionEnv(base_env.BaseFlockEnv):
         chex.Array
             Agent rewards
         """
-        obs = steps.vision_model(self.n_view)(
+        obs = steps.vision_model(self.i_range, self.n_view)(
             key, params, boids, boids, pos=boids.position
         )
         return obs
