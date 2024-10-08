@@ -56,49 +56,52 @@ def observe(i_range: float):
     return _observe
 
 
-@esquilax.transforms.amap
-def flatten_observations(
-    _k: chex.PRNGKey,
-    params: data_types.EnvParams,
-    observations: Tuple[data_types.Boid, data_types.Observation],
-):
-    boid, obs = observations
+def flatten_observations(i_range: float):
+    @esquilax.transforms.amap
+    def _flatten_observations(
+        _k: chex.PRNGKey,
+        params: data_types.EnvParams,
+        observations: Tuple[data_types.Boid, data_types.Observation],
+    ):
+        boid, obs = observations
 
-    def vec_to_polar(dx):
-        d = jnp.sqrt(jnp.sum(dx * dx))
-        phi = jnp.arctan2(dx[1], dx[0]) % (2 * jnp.pi)
-        d_phi = (
-            esquilax.utils.shortest_vector(boid.heading, phi, length=2 * jnp.pi)
-            / jnp.pi
+        def vec_to_polar(dx):
+            d = jnp.sqrt(jnp.sum(dx * dx))
+            phi = jnp.arctan2(dx[1], dx[0]) % (2 * jnp.pi)
+            d_phi = (
+                esquilax.utils.shortest_vector(boid.heading, phi, length=2 * jnp.pi)
+                / jnp.pi
+            )
+            return d, d_phi
+
+        def obs_to_nbs():
+            _x_nb = obs.pos / obs.n_flock
+            _s_nb = obs.speed / obs.n_flock
+            _h_nb = obs.heading / obs.n_flock
+            d, d_phi = vec_to_polar(_x_nb)
+            d = d / i_range
+            dh = _h_nb / jnp.pi
+            ds = (_s_nb - boid.speed) / (params.max_speed - params.min_speed)
+            return jnp.array([d, d_phi, dh, ds])
+
+        def obs_to_collision():
+            _x_close = obs.pos_coll / obs.n_coll
+            d, d_phi = vec_to_polar(_x_close)
+            d = d / (2 * params.agent_radius)
+            return jnp.array([d, d_phi])
+
+        flock_obs = jax.lax.cond(
+            obs.n_flock > 0,
+            obs_to_nbs,
+            lambda: jnp.array([1.0, 0.0, 0.0, 0.0]),
         )
-        return d, d_phi
+        coll_obs = jax.lax.cond(
+            obs.n_coll > 0, obs_to_collision, lambda: jnp.array([1.0, 0.0])
+        )
 
-    def obs_to_nbs():
-        _x_nb = obs.pos / obs.n_flock
-        _s_nb = obs.speed / obs.n_flock
-        _h_nb = obs.heading / obs.n_flock
-        d, d_phi = vec_to_polar(_x_nb)
-        d = d / params.i_range
-        dh = _h_nb / jnp.pi
-        ds = (_s_nb - boid.speed) / (params.max_speed - params.min_speed)
-        return jnp.array([d, d_phi, dh, ds])
+        return jnp.concat([flock_obs, coll_obs])
 
-    def obs_to_collision():
-        _x_close = obs.pos_coll / obs.n_coll
-        d, d_phi = vec_to_polar(_x_close)
-        d = d / (2 * params.agent_radius)
-        return jnp.array([d, d_phi])
-
-    flock_obs = jax.lax.cond(
-        obs.n_flock > 0,
-        obs_to_nbs,
-        lambda: jnp.array([1.0, 0.0, 0.0, 0.0]),
-    )
-    coll_obs = jax.lax.cond(
-        obs.n_coll > 0, obs_to_collision, lambda: jnp.array([1.0, 0.0])
-    )
-
-    return jnp.concat([flock_obs, coll_obs])
+    return _flatten_observations
 
 
 @esquilax.transforms.amap

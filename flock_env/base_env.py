@@ -46,7 +46,7 @@ class BaseFlockEnv(
         -------
         data_types.EnvParams
         """
-        return data_types.EnvParams(i_range=self.i_range)
+        return data_types.EnvParams()
 
     def reset(
         self, key: chex.PRNGKey, params: data_types.EnvParams

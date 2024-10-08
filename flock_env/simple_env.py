@@ -80,5 +80,7 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         observations = steps.observe(self.i_range)(
             key, params, boids, boids, pos=boids.position
         )
-        obs = steps.flatten_observations(key, params, (boids, observations))
+        obs = steps.flatten_observations(self.i_range)(
+            key, params, (boids, observations)
+        )
         return obs

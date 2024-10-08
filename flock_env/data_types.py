@@ -22,7 +22,6 @@ class EnvParams:
     max_rotate: float = 0.025
     max_accelerate: float = 0.001
     collision_penalty: float = 0.1
-    i_range: float = 0.1
     agent_radius: float = 0.01
     view_angle: float = 0.5
 

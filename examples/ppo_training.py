@@ -14,6 +14,7 @@ def training(
     *,
     rng: Union[int, chex.PRNGKey],
     n_agents: int,
+    i_range: float,
     n_train_steps: int,
     test_every: int,
     n_env_steps: int,
@@ -41,6 +42,8 @@ def training(
         Jax random key or random seed
     n_agents
         Number of boids to simulate
+    i_range
+        Range at which agents will interact
     n_train_steps
         Number of training updates (i.e.
         number of times we sample trajectories)
@@ -103,6 +106,7 @@ def training(
     env = env_type(
         reward_func=flock_env.rewards.exponential_rewards,
         n_agents=n_agents,
+        i_range=i_range,
         **env_kwargs,
     )
 
