@@ -16,6 +16,7 @@ class BasePredatorPreyEnv(
 ):
     def __init__(
         self,
+        *,
         n_predators: int,
         n_prey: int,
         prey_vision_range: float,
@@ -75,7 +76,7 @@ class BasePredatorPreyEnv(
             pos=prey.position,
             pos_b=predators.position,
         )
-        predator_rewards = steps.predator_rewards(
+        predator_rewards = steps.predator_rewards(self.agent_radius)(
             key,
             params.predator_reward,
             None,
@@ -85,7 +86,7 @@ class BasePredatorPreyEnv(
         )
         rewards = data_types.PredatorPrey(
             predator=predator_rewards,
-            prey_rewards=prey_rewards,
+            prey=prey_rewards,
         )
         obs = self.get_obs(key, params, state)
         done = self.is_terminal(params, state)
@@ -99,7 +100,7 @@ class BasePredatorPreyEnv(
     ) -> data_types.PredatorPrey:
         prey_obs_predators = steps.vision_model(self.prey_vision_range, self.n_vision)(
             key,
-            (params.prey_params.view_angle, params.agent_radius),
+            (params.prey_params.view_angle, self.agent_radius),
             state.prey,
             state.predators,
             pos=state.prey.position,
@@ -107,7 +108,7 @@ class BasePredatorPreyEnv(
         )
         prey_obs_prey = steps.vision_model(self.prey_vision_range, self.n_vision)(
             key,
-            (params.predator_params.view_angle, params.agent_radius),
+            (params.predator_params.view_angle, self.agent_radius),
             state.prey,
             state.prey,
             pos=state.prey.position,
@@ -116,7 +117,7 @@ class BasePredatorPreyEnv(
             self.predator_vision_range, self.n_vision
         )(
             key,
-            (params.predator_params.view_angle, params.agent_radius),
+            (params.predator_params.view_angle, self.agent_radius),
             state.predators,
             state.prey,
             pos=state.predators.position,
@@ -126,14 +127,14 @@ class BasePredatorPreyEnv(
             self.predator_vision_range, self.n_vision
         )(
             key,
-            (params.predator_params.view_angle, params.agent_radius),
+            (params.predator_params.view_angle, self.agent_radius),
             state.predators,
             state.predators,
             pos=state.predators.position,
         )
 
-        predator_obs = jnp.concat([predator_obs_prey, predator_obs_predator])
-        prey_obs = jnp.concat([prey_obs_predators, prey_obs_prey])
+        predator_obs = jnp.hstack([predator_obs_prey, predator_obs_predator])
+        prey_obs = jnp.hstack([prey_obs_predators, prey_obs_prey])
 
         return data_types.PredatorPrey(
             predator=predator_obs,
@@ -144,7 +145,7 @@ class BasePredatorPreyEnv(
         self, params: data_types.PredatorPreyParams, state: data_types.PredatorPreyState
     ) -> data_types.PredatorPrey:
         return data_types.PredatorPrey(
-            predators=jnp.full((self.n_predators,), False),
+            predator=jnp.full((self.n_predators,), False),
             prey=jnp.full((self.n_prey,), False),
         )
 

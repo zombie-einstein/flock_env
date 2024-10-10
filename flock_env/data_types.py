@@ -47,7 +47,6 @@ class PredatorPreyParams:
     predator_params: BoidParams = BoidParams()
     prey_penalty: float = 0.1
     predator_reward: float = 0.1
-    agent_radius: float = 0.01
 
 
 @chex.dataclass

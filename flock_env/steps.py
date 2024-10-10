@@ -233,3 +233,5 @@ def prey_rewards(agent_radius: float):
     )
     def _prey_rewards(_k: chex.PRNGKey, reward: float, _a, _b):
         return reward
+
+    return _prey_rewards
