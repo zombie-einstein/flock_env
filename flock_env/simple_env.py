@@ -78,7 +78,7 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
             Agent rewards
         """
         observations = steps.observe(self.i_range)(
-            key, params, boids, boids, pos=boids.position
+            key, params.agent_radius, boids, boids, pos=boids.position
         )
         obs = steps.flatten_observations(self.i_range)(
             key, params, (boids, observations)

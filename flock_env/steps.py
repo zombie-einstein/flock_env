@@ -30,7 +30,7 @@ def observe(i_range: float):
     )
     def _observe(
         _k: chex.PRNGKey,
-        params: data_types.EnvParams,
+        agent_radius: float,
         a: data_types.Boid,
         b: data_types.Boid,
     ):
@@ -39,7 +39,7 @@ def observe(i_range: float):
         d = jnp.sqrt(jnp.sum(dx * dx))
 
         is_close, close_pos = jax.lax.cond(
-            d < 2 * params.agent_radius,
+            d < 2 * agent_radius,
             lambda: (1, dx),
             lambda: (0, jnp.zeros(2)),
         )
@@ -81,7 +81,9 @@ def flatten_observations(i_range: float):
             d, d_phi = vec_to_polar(_x_nb)
             d = d / i_range
             dh = _h_nb / jnp.pi
-            ds = (_s_nb - boid.speed) / (params.max_speed - params.min_speed)
+            ds = (_s_nb - boid.speed) / (
+                params.boids.max_speed - params.boids.min_speed
+            )
             return jnp.array([d, d_phi, dh, ds])
 
         def obs_to_collision():
@@ -107,7 +109,7 @@ def flatten_observations(i_range: float):
 @esquilax.transforms.amap
 def update_velocity(
     _k: chex.PRNGKey,
-    params: data_types.EnvParams,
+    params: data_types.BoidParams,
     x: Tuple[chex.Array, data_types.Boid],
 ):
     actions, boid = x
@@ -125,7 +127,7 @@ def update_velocity(
 
 
 @esquilax.transforms.amap
-def move(_key: chex.PRNGKey, _params: data_types.EnvParams, x):
+def move(_key: chex.PRNGKey, _params: data_types.BoidParams, x):
     pos, heading, speed = x
     d_pos = jnp.array([speed * jnp.cos(heading), speed * jnp.sin(heading)])
     return (pos + d_pos) % 1.0
@@ -175,13 +177,14 @@ def vision_model(i_range: float, n: int):
     )
     def view(
         _k: chex.PRNGKey,
-        params: data_types.EnvParams,
+        params: Tuple[float, float],
         a: data_types.Boid,
         b: data_types.Boid,
     ):
+        view_angle, radius = params
         rays = jnp.linspace(
-            -params.view_angle * jnp.pi,
-            params.view_angle * jnp.pi,
+            -view_angle * jnp.pi,
+            view_angle * jnp.pi,
             n,
             endpoint=True,
         )
@@ -190,7 +193,7 @@ def vision_model(i_range: float, n: int):
         phi = jnp.arctan2(dx[1], dx[0]) % (2 * jnp.pi)
         dh = esquilax.utils.shortest_vector(phi, a.heading, 2 * jnp.pi)
 
-        angular_width = jnp.arctan2(params.agent_radius, d)
+        angular_width = jnp.arctan2(radius, d)
         left = dh - angular_width
         right = dh + angular_width
 

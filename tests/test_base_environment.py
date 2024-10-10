@@ -70,8 +70,8 @@ def test_reset(params: flock_env.EnvParams, env: BaseFlockEnv):
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(env_state.boids.speed, params.min_speed),
-            jnp.less_equal(env_state.boids.speed, params.max_speed),
+            jnp.greater_equal(env_state.boids.speed, params.boids.min_speed),
+            jnp.less_equal(env_state.boids.speed, params.boids.max_speed),
         )
     )
 
@@ -119,8 +119,8 @@ def test_update_sequence(params: flock_env.EnvParams, env: BaseFlockEnv):
     )
     assert jnp.all(
         jnp.logical_and(
-            jnp.greater_equal(state_seq.boids.speed, params.min_speed),
-            jnp.less_equal(state_seq.boids.speed, params.max_speed),
+            jnp.greater_equal(state_seq.boids.speed, params.boids.min_speed),
+            jnp.less_equal(state_seq.boids.speed, params.boids.max_speed),
         )
     )
     assert jnp.array_equal(state_seq.step, jnp.arange(n_steps) + 1)
@@ -139,10 +139,12 @@ def test_movement(dummy_env):
         step=0,
     )
     p = flock_env.EnvParams(
-        min_speed=0.1,
-        max_speed=0.25,
-        max_rotate=0.5,
-        max_accelerate=0.1,
+        boids=flock_env.BoidParams(
+            min_speed=0.1,
+            max_speed=0.25,
+            max_rotate=0.5,
+            max_accelerate=0.1,
+        ),
         agent_radius=0.01,
         collision_penalty=0.1,
     )
@@ -196,10 +198,12 @@ def test_rotation(dummy_env):
         step=0,
     )
     p = flock_env.EnvParams(
-        min_speed=0.1,
-        max_speed=0.25,
-        max_rotate=0.5,
-        max_accelerate=0.1,
+        boids=flock_env.BoidParams(
+            min_speed=0.1,
+            max_speed=0.25,
+            max_rotate=0.5,
+            max_accelerate=0.1,
+        ),
         agent_radius=0.01,
         collision_penalty=0.1,
     )
@@ -231,10 +235,12 @@ def test_acceleration(dummy_env):
         step=0,
     )
     p = flock_env.EnvParams(
-        min_speed=0.0,
-        max_speed=0.5,
-        max_rotate=0.5,
-        max_accelerate=0.1,
+        boids=flock_env.BoidParams(
+            min_speed=0.0,
+            max_speed=0.5,
+            max_rotate=0.5,
+            max_accelerate=0.1,
+        ),
         agent_radius=0.01,
         collision_penalty=0.1,
     )
