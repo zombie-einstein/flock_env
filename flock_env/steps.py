@@ -201,3 +201,35 @@ def vision_model(i_range: float, n: int):
         return obs
 
     return view
+
+
+def predator_rewards(agent_radius: float):
+
+    i_range = 2 * agent_radius
+    n_bins = floor(1.0 / i_range)
+
+    @esquilax.transforms.spatial(
+        n_bins,
+        jnp.add,
+        0.0,
+        include_self=False,
+        i_range=i_range,
+    )
+    def _predator_rewards(_k: chex.PRNGKey, penalty: float, _a, _b):
+        return -penalty
+
+    return _predator_rewards
+
+
+def prey_rewards(agent_radius: float):
+
+    i_range = 2 * agent_radius
+    n_bins = floor(1.0 / i_range)
+
+    @esquilax.transforms.nearest_neighbour(
+        n_bins,
+        0.0,
+        i_range=i_range,
+    )
+    def _prey_rewards(_k: chex.PRNGKey, reward: float, _a, _b):
+        return reward

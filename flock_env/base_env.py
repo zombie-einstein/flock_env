@@ -112,21 +112,8 @@ class BaseFlockEnv(
             - Agent rewards
             - Terminal flags
         """
-        actions = jnp.clip(actions, min=-1.0, max=1.0)
-        headings, speeds = steps.update_velocity(
-            key, params.boids, (actions, state.boids)
-        )
-        positions = steps.move(
-            key, params.boids, (state.boids.position, headings, speeds)
-        )
-        state = data_types.EnvState(
-            boids=data_types.Boid(
-                position=positions,
-                speed=speeds,
-                heading=headings,
-            ),
-            step=state.step + 1,
-        )
+        boids = utils.update_state(key, params.boids, state.boids, actions)
+        state = data_types.EnvState(boids=boids, step=state.step + 1)
         collisions, rewards = steps.rewards(self.i_range)(
             key,
             params,

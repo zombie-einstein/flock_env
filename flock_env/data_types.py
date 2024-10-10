@@ -39,3 +39,25 @@ class Observation:
     heading: float = 0.0
     n_coll: int = 0
     pos_coll: chex.Array = jnp.zeros(2)
+
+
+@chex.dataclass
+class PredatorPreyParams:
+    prey_params: BoidParams = BoidParams()
+    predator_params: BoidParams = BoidParams()
+    prey_penalty: float = 0.1
+    predator_reward: float = 0.1
+    agent_radius: float = 0.01
+
+
+@chex.dataclass
+class PredatorPreyState:
+    prey: Boid
+    predators: Boid
+    step: int
+
+
+@chex.dataclass
+class PredatorPrey:
+    predator: chex.Array
+    prey: chex.Array
