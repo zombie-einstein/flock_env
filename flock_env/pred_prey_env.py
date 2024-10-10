@@ -23,6 +23,7 @@ class BasePredatorPreyEnv(
         predator_vision_range: float,
         n_vision: int,
         agent_radius: float,
+        sparse_rewards: bool,
     ):
         self.n_predators = n_predators
         self.n_prey = n_prey
@@ -30,6 +31,7 @@ class BasePredatorPreyEnv(
         self.prey_vision_range = prey_vision_range
         self.n_vision = n_vision
         self.agent_radius = agent_radius
+        self.sparse_rewards = sparse_rewards
 
     def default_params(self) -> data_types.PredatorPreyParams:
         return data_types.PredatorPreyParams()
@@ -68,22 +70,44 @@ class BasePredatorPreyEnv(
             prey=prey,
             step=state.step + 1,
         )
-        prey_rewards = steps.prey_rewards(self.agent_radius)(
-            key,
-            params.prey_penalty,
-            None,
-            None,
-            pos=prey.position,
-            pos_b=predators.position,
-        )
-        predator_rewards = steps.predator_rewards(self.agent_radius)(
-            key,
-            params.predator_reward,
-            None,
-            None,
-            pos=predators.position,
-            pos_b=prey.position,
-        )
+
+        if self.sparse_rewards:
+            prey_rewards = steps.sparse_prey_rewards(self.agent_radius)(
+                key,
+                params.prey_penalty,
+                None,
+                None,
+                pos=prey.position,
+                pos_b=predators.position,
+            )
+            predator_rewards = steps.sparse_predator_rewards(self.agent_radius)(
+                key,
+                params.predator_reward,
+                None,
+                None,
+                pos=predators.position,
+                pos_b=prey.position,
+            )
+        else:
+            prey_rewards = steps.distance_prey_rewards(0.2 * self.prey_vision_range)(
+                key,
+                params.prey_penalty,
+                prey,
+                predators,
+                pos=prey.position,
+                pos_b=predators.position,
+            )
+            predator_rewards = steps.distance_predator_rewards(
+                0.2 * self.predator_vision_range
+            )(
+                key,
+                params.predator_reward,
+                predators,
+                prey,
+                pos=predators.position,
+                pos_b=prey.position,
+            )
+
         rewards = data_types.PredatorPrey(
             predator=predator_rewards,
             prey=prey_rewards,
@@ -183,7 +207,7 @@ class BasePredatorPreyEnv(
         gymnax.spaces.Space
             Observation space description
         """
-        spaces.Box(0, 1.0, shape=(2 * self.n_vision,), dtype=jnp.float32)
+        return spaces.Box(0, 1.0, shape=(2 * self.n_vision,), dtype=jnp.float32)
 
     def state_space(self, params: data_types.EnvParams) -> spaces.Space:
         """

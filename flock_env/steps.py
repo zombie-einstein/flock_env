@@ -203,7 +203,7 @@ def vision_model(i_range: float, n: int):
     return view
 
 
-def predator_rewards(agent_radius: float):
+def sparse_prey_rewards(agent_radius: float):
 
     i_range = 2 * agent_radius
     n_bins = floor(1.0 / i_range)
@@ -215,13 +215,36 @@ def predator_rewards(agent_radius: float):
         include_self=False,
         i_range=i_range,
     )
-    def _predator_rewards(_k: chex.PRNGKey, penalty: float, _a, _b):
+    def _prey_rewards(_k: chex.PRNGKey, penalty: float, _prey, _predator):
         return -penalty
 
-    return _predator_rewards
+    return _prey_rewards
 
 
-def prey_rewards(agent_radius: float):
+def distance_prey_rewards(i_range: float):
+
+    n_bins = floor(1.0 / i_range)
+
+    @esquilax.transforms.spatial(
+        n_bins,
+        jnp.add,
+        0.0,
+        include_self=False,
+        i_range=i_range,
+    )
+    def _prey_rewards(
+        _k: chex.PRNGKey,
+        penalty: float,
+        prey: data_types.Boid,
+        predator: data_types.Boid,
+    ):
+        d = esquilax.utils.shortest_distance(prey.position, predator.position) / i_range
+        return penalty * (d - 1.0)
+
+    return _prey_rewards
+
+
+def sparse_predator_rewards(agent_radius: float):
 
     i_range = 2 * agent_radius
     n_bins = floor(1.0 / i_range)
@@ -231,7 +254,30 @@ def prey_rewards(agent_radius: float):
         0.0,
         i_range=i_range,
     )
-    def _prey_rewards(_k: chex.PRNGKey, reward: float, _a, _b):
+    def _predator_rewards(_k: chex.PRNGKey, reward: float, _a, _b):
         return reward
+
+    return _predator_rewards
+
+
+def distance_predator_rewards(i_range: float):
+
+    n_bins = floor(1.0 / i_range)
+
+    @esquilax.transforms.spatial(
+        n_bins,
+        jnp.add,
+        0.0,
+        include_self=False,
+        i_range=i_range,
+    )
+    def _prey_rewards(
+        _k: chex.PRNGKey,
+        reward: float,
+        predator: data_types.Boid,
+        prey: data_types.Boid,
+    ):
+        d = esquilax.utils.shortest_distance(predator.position, prey.position) / i_range
+        return reward * (1.0 - d)
 
     return _prey_rewards

@@ -1,9 +1,11 @@
 import jax
+import pytest
 
 import flock_env
 
 
-def test_pred_prey_env():
+@pytest.mark.parametrize("sparse_rewards", [True, False])
+def test_pred_prey_env(sparse_rewards):
 
     k = jax.random.PRNGKey(101)
     n_vision = 10
@@ -17,6 +19,7 @@ def test_pred_prey_env():
         predator_vision_range=0.4,
         n_vision=n_vision,
         agent_radius=0.01,
+        sparse_rewards=sparse_rewards,
     )
 
     params = env.default_params()
