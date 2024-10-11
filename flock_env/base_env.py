@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 from gymnax.environments import spaces
 
-from . import data_types, steps
+from . import data_types, steps, utils
 
 
 class BaseFlockEnv(
@@ -66,24 +66,8 @@ class BaseFlockEnv(
         tuple[chex.Array, flock_env.data_types.EnvState]
             Agent observations and new environment state.
         """
-        k1, k2, k3 = jax.random.split(key, 3)
-
-        positions = jax.random.uniform(k1, (self.n_agents, 2))
-        speeds = jax.random.uniform(
-            k2, (self.n_agents,), minval=params.min_speed, maxval=params.max_speed
-        )
-        headings = jax.random.uniform(
-            k3, (self.n_agents,), minval=0.0, maxval=2.0 * jnp.pi
-        )
-
-        new_state = data_types.EnvState(
-            boids=data_types.Boid(
-                position=positions,
-                speed=speeds,
-                heading=headings,
-            ),
-            step=0,
-        )
+        boids = utils.init_boids(self.n_agents, params.boids, key)
+        new_state = data_types.EnvState(boids=boids, step=0)
         obs = self.get_obs(key, params, new_state.boids)
         return jax.lax.stop_gradient((obs, new_state))
 
@@ -128,17 +112,8 @@ class BaseFlockEnv(
             - Agent rewards
             - Terminal flags
         """
-        actions = jnp.clip(actions, min=-1.0, max=1.0)
-        headings, speeds = steps.update_velocity(key, params, (actions, state.boids))
-        positions = steps.move(key, params, (state.boids.position, headings, speeds))
-        state = data_types.EnvState(
-            boids=data_types.Boid(
-                position=positions,
-                speed=speeds,
-                heading=headings,
-            ),
-            step=state.step + 1,
-        )
+        boids = utils.update_state(key, params.boids, state.boids, actions)
+        state = data_types.EnvState(boids=boids, step=state.step + 1)
         collisions, rewards = steps.rewards(self.i_range)(
             key,
             params,

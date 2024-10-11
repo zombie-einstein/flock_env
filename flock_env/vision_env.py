@@ -80,6 +80,10 @@ class VisionEnv(base_env.BaseFlockEnv):
             Agent rewards
         """
         obs = steps.vision_model(self.i_range, self.n_view)(
-            key, params, boids, boids, pos=boids.position
+            key,
+            (params.boids.view_angle, params.agent_radius),
+            boids,
+            boids,
+            pos=boids.position,
         )
         return obs

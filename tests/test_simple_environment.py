@@ -50,10 +50,12 @@ def test_observation(dummy_env, pos, head, expected):
         heading=jnp.array(head),
     )
     p = flock_env.EnvParams(
-        min_speed=0.0,
-        max_speed=0.5,
-        max_rotate=0.5,
-        max_accelerate=0.1,
+        boids=flock_env.BoidParams(
+            min_speed=0.0,
+            max_speed=0.5,
+            max_rotate=0.5,
+            max_accelerate=0.1,
+        ),
         agent_radius=0.01,
         collision_penalty=0.1,
     )
