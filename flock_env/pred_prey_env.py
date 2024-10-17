@@ -1,5 +1,4 @@
 import typing
-from math import floor
 
 import chex
 import esquilax
@@ -29,9 +28,7 @@ class BasePredatorPreyEnv(
         self.n_predators = n_predators
         self.n_prey = n_prey
         self.predator_vision_range = predator_vision_range
-        self.n_predator_view_bins = floor(1.0 / predator_vision_range)
         self.prey_vision_range = prey_vision_range
-        self.n_prey_vision_bins = floor(1.0 / prey_vision_range)
         self.n_vision = n_vision
         self.agent_radius = agent_radius
         self.sparse_rewards = sparse_rewards
@@ -80,7 +77,6 @@ class BasePredatorPreyEnv(
                 reduction=jnp.add,
                 default=0.0,
                 include_self=False,
-                n_bins=floor(0.5 / self.agent_radius),
                 i_range=2 * self.agent_radius,
             )(
                 key,
@@ -93,7 +89,6 @@ class BasePredatorPreyEnv(
             predator_rewards = esquilax.transforms.nearest_neighbour(
                 steps.sparse_predator_rewards,
                 default=0.0,
-                n_bins=floor(0.5 / self.agent_radius),
                 i_range=2 * self.agent_radius,
             )(
                 key,
@@ -109,7 +104,6 @@ class BasePredatorPreyEnv(
                 reduction=jnp.add,
                 default=0.0,
                 include_self=False,
-                n_bins=self.n_prey_vision_bins,
                 i_range=self.prey_vision_range,
             )(
                 key,
@@ -125,7 +119,6 @@ class BasePredatorPreyEnv(
                 reduction=jnp.add,
                 default=0.0,
                 include_self=False,
-                n_bins=self.n_predator_view_bins,
                 i_range=self.predator_vision_range,
             )(
                 key,
@@ -156,7 +149,6 @@ class BasePredatorPreyEnv(
             reduction=jnp.minimum,
             default=jnp.ones((self.n_vision,)),
             include_self=False,
-            n_bins=self.n_prey_vision_bins,
             i_range=self.prey_vision_range,
         )(
             key,
@@ -173,7 +165,6 @@ class BasePredatorPreyEnv(
             reduction=jnp.minimum,
             default=jnp.ones((self.n_vision,)),
             include_self=False,
-            n_bins=self.n_prey_vision_bins,
             i_range=self.prey_vision_range,
         )(
             key,
@@ -189,7 +180,6 @@ class BasePredatorPreyEnv(
             reduction=jnp.minimum,
             default=jnp.ones((self.n_vision,)),
             include_self=False,
-            n_bins=self.n_predator_view_bins,
             i_range=self.predator_vision_range,
         )(
             key,
@@ -206,7 +196,6 @@ class BasePredatorPreyEnv(
             reduction=jnp.minimum,
             default=jnp.ones((self.n_vision,)),
             include_self=False,
-            n_bins=self.n_predator_view_bins,
             i_range=self.predator_vision_range,
         )(
             key,

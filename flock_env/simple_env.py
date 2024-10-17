@@ -90,7 +90,6 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
             ),
             default=data_types.Observation(),
             include_self=False,
-            n_bins=self.n_bins,
             i_range=self.i_range,
         )(key, params.agent_radius, boids, boids, pos=boids.position)
         obs = steps.flatten_observations(

@@ -85,7 +85,6 @@ class VisionEnv(base_env.BaseFlockEnv):
             reduction=jnp.minimum,
             default=jnp.ones((self.n_view,)),
             include_self=False,
-            n_bins=self.n_bins,
             i_range=self.i_range,
         )(
             key,

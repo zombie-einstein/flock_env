@@ -723,13 +723,13 @@ files = [
 
 [[package]]
 name = "esquilax"
-version = "1.0.0"
+version = "1.0.1"
 description = "JAX multi-agent simulation and ML toolset"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "esquilax-1.0.0-py3-none-any.whl", hash = "sha256:7f182985fc39a7a84e93fdd9698b871c74decaceb2fcb54392d78a45b174fbda"},
-    {file = "esquilax-1.0.0.tar.gz", hash = "sha256:cc81d4429dc0ef0762ad5713d42eb4d5daa8bae2ca4b6dedb601d71270343732"},
+    {file = "esquilax-1.0.1-py3-none-any.whl", hash = "sha256:3d220329d1c9d28da65aba1197cbb4335ffb609155918083f76ae9e1732e2f78"},
+    {file = "esquilax-1.0.1.tar.gz", hash = "sha256:1a2ee7b2236e37f2a6fb11467c8f9d00d6e04c5bdac2bd31f2737ec7ff2f4d10"},
 ]
 
 [package.dependencies]
@@ -3924,4 +3924,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "0f539018bf39532dbc55b713ed14528673528f90f060612438f136462ef962e0"
+content-hash = "c689c840fdff41a5e98641b81269bffa23d52960f9cb3ba2371c472f69a467c3"

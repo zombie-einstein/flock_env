@@ -1,5 +1,4 @@
 import typing
-from math import floor
 
 import chex
 import esquilax
@@ -38,7 +37,6 @@ class BaseFlockEnv(
         self.reward_func = reward_func
         self.n_agents = n_agents
         self.i_range = i_range
-        self.n_bins = floor(1.0 / i_range)
 
     def default_params(self) -> data_types.EnvParams:
         """
@@ -122,7 +120,6 @@ class BaseFlockEnv(
             default=(0, 0.0),
             include_self=False,
             topology="moore",
-            n_bins=self.n_bins,
             i_range=self.i_range,
         )(
             key,
