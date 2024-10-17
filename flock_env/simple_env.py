@@ -1,4 +1,5 @@
 import chex
+import esquilax
 import jax.numpy as jnp
 from gymnax.environments import spaces
 
@@ -77,10 +78,21 @@ class SimpleFlockEnv(base_env.BaseFlockEnv):
         chex.Array
             Agent rewards
         """
-        observations = steps.observe(self.i_range)(
-            key, params.agent_radius, boids, boids, pos=boids.position
-        )
-        obs = steps.flatten_observations(self.i_range)(
-            key, params, (boids, observations)
+        observations = esquilax.transforms.spatial(
+            steps.observe,
+            reduction=data_types.Observation(
+                n_flock=jnp.add,
+                pos=jnp.add,
+                speed=jnp.add,
+                heading=jnp.add,
+                n_coll=jnp.add,
+                pos_coll=jnp.add,
+            ),
+            default=data_types.Observation(),
+            include_self=False,
+            i_range=self.i_range,
+        )(key, params.agent_radius, boids, boids, pos=boids.position)
+        obs = steps.flatten_observations(
+            key, params, (boids, observations), i_range=self.i_range
         )
         return obs

@@ -114,13 +114,21 @@ class BaseFlockEnv(
         """
         boids = utils.update_state(key, params.boids, state.boids, actions)
         state = data_types.EnvState(boids=boids, step=state.step + 1)
-        collisions, rewards = steps.rewards(self.i_range)(
+        collisions, rewards = esquilax.transforms.spatial(
+            steps.rewards,
+            reduction=(jnp.add, jnp.add),
+            default=(0, 0.0),
+            include_self=False,
+            topology="moore",
+            i_range=self.i_range,
+        )(
             key,
             params,
             state.boids,
             state.boids,
             pos=state.boids.position,
             f=self.reward_func,
+            i_range=self.i_range,
         )
         rewards = jnp.where(collisions > 0, -params.collision_penalty, rewards)
         obs = self.get_obs(key, params, state.boids)

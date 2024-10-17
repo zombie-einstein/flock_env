@@ -14,7 +14,7 @@ python = ">=3.10,<3.12"
 jax = "^0.4.4"
 chex = "^0.1.6"
 matplotlib = "^3.7.1"
-esquilax = "^0.3.1"
+esquilax = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.21.0"
