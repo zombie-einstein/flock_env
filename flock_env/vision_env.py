@@ -1,6 +1,7 @@
 from typing import Callable
 
 import chex
+import esquilax
 import jax.numpy as jnp
 from gymnax.environments import spaces
 
@@ -79,11 +80,20 @@ class VisionEnv(base_env.BaseFlockEnv):
         chex.Array
             Agent rewards
         """
-        obs = steps.vision_model(self.i_range, self.n_view)(
+        obs = esquilax.transforms.spatial(
+            steps.view,
+            reduction=jnp.minimum,
+            default=jnp.ones((self.n_view,)),
+            include_self=False,
+            n_bins=self.n_bins,
+            i_range=self.i_range,
+        )(
             key,
             (params.boids.view_angle, params.agent_radius),
             boids,
             boids,
             pos=boids.position,
+            n_view=self.n_view,
+            i_range=self.i_range,
         )
         return obs

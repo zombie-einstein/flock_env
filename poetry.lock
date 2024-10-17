@@ -426,19 +426,19 @@ files = [
 
 [[package]]
 name = "chex"
-version = "0.1.86"
+version = "0.1.87"
 description = "Chex: Testing made fun, in JAX!"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "chex-0.1.86-py3-none-any.whl", hash = "sha256:251c20821092323a3d9c28e1cf80e4a58180978bec368f531949bd9847eee568"},
-    {file = "chex-0.1.86.tar.gz", hash = "sha256:e8b0f96330eba4144659e1617c0f7a57b161e8cbb021e55c6d5056c7378091d1"},
+    {file = "chex-0.1.87-py3-none-any.whl", hash = "sha256:ce536475661fd96d21be0c1728ecdbedd03f8ff950c662dfc338c92ea782cb16"},
+    {file = "chex-0.1.87.tar.gz", hash = "sha256:0096d89cc8d898bb521ef4bfbf5c24549022b0e5b301f529ab57238896fe6c5d"},
 ]
 
 [package.dependencies]
 absl-py = ">=0.9.0"
-jax = ">=0.4.16"
-jaxlib = ">=0.1.37"
+jax = ">=0.4.27"
+jaxlib = ">=0.4.27"
 numpy = ">=1.24.1"
 toolz = ">=0.9.0"
 typing-extensions = ">=4.2.0"
@@ -723,13 +723,13 @@ files = [
 
 [[package]]
 name = "esquilax"
-version = "0.3.1"
+version = "1.0.0"
 description = "JAX multi-agent simulation and ML toolset"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "esquilax-0.3.1-py3-none-any.whl", hash = "sha256:72f0555a31f91c002e0d47b8ae82b1dc1b85c3b580aeba932a29be77497213d2"},
-    {file = "esquilax-0.3.1.tar.gz", hash = "sha256:8c0b863caaa11fb2ded1414111b5eb1b966371578c328b97dd2c5e4fd8f5c8d0"},
+    {file = "esquilax-1.0.0-py3-none-any.whl", hash = "sha256:7f182985fc39a7a84e93fdd9698b871c74decaceb2fcb54392d78a45b174fbda"},
+    {file = "esquilax-1.0.0.tar.gz", hash = "sha256:cc81d4429dc0ef0762ad5713d42eb4d5daa8bae2ca4b6dedb601d71270343732"},
 ]
 
 [package.dependencies]
@@ -737,7 +737,7 @@ chex = ">=0.1.86,<0.2.0"
 evosax = ">=0.1.6,<0.2.0"
 flax = ">=0.8.5,<0.9.0"
 jax = ">=0.4.30,<0.5.0"
-jax-tqdm = ">=0.2.1,<0.3.0"
+jax-tqdm = ">=0.3.1,<0.4.0"
 
 [[package]]
 name = "etils"
@@ -753,7 +753,7 @@ files = [
 [package.dependencies]
 fsspec = {version = "*", optional = true, markers = "extra == \"epath\""}
 importlib_resources = {version = "*", optional = true, markers = "extra == \"epath\""}
-typing_extensions = {version = "*", optional = true, markers = "extra == \"epath\" or extra == \"epy\""}
+typing_extensions = {version = "*", optional = true, markers = "extra == \"epy\""}
 zipp = {version = "*", optional = true, markers = "extra == \"epath\""}
 
 [package.extras]
@@ -1403,16 +1403,17 @@ resolved_reference = "8a64da2d1a4646e2479f5e3f9efb32d25a7bfb65"
 
 [[package]]
 name = "jax-tqdm"
-version = "0.2.2"
+version = "0.3.1"
 description = "Tqdm progress bar for JAX scans and loops"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "jax_tqdm-0.2.2-py3-none-any.whl", hash = "sha256:4007ce510e7bc81efc8dd75330f842d4698b8ec5cbd61453f8fe0b237b16af26"},
-    {file = "jax_tqdm-0.2.2.tar.gz", hash = "sha256:178cf14f77c11f1318bd305d14771185aff72fb1a03332e06c78e51cc230f888"},
+    {file = "jax_tqdm-0.3.1-py3-none-any.whl", hash = "sha256:a44a650ec150149be1532ee827e9fa34fc3e76dd5df0da13e3e69d912dfd37d5"},
+    {file = "jax_tqdm-0.3.1.tar.gz", hash = "sha256:b76b3ecc334b91f414f52740c28c1aa85bb75eb8d1a0048b5723db3dd4812a1a"},
 ]
 
 [package.dependencies]
+chex = ">=0.1.87,<0.2.0"
 jax = ">=0.4.12"
 tqdm = ">=4.64.1,<5.0.0"
 
@@ -3923,4 +3924,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "c2f74ecf1589fcefd39e6ae28cc2b32f95b00efc90076122f74e6d8da9872ab9"
+content-hash = "0f539018bf39532dbc55b713ed14528673528f90f060612438f136462ef962e0"

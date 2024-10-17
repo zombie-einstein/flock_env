@@ -1,4 +1,5 @@
 import typing
+from math import floor
 
 import chex
 import esquilax
@@ -28,7 +29,9 @@ class BasePredatorPreyEnv(
         self.n_predators = n_predators
         self.n_prey = n_prey
         self.predator_vision_range = predator_vision_range
+        self.n_predator_view_bins = floor(1.0 / predator_vision_range)
         self.prey_vision_range = prey_vision_range
+        self.n_prey_vision_bins = floor(1.0 / prey_vision_range)
         self.n_vision = n_vision
         self.agent_radius = agent_radius
         self.sparse_rewards = sparse_rewards
@@ -72,7 +75,14 @@ class BasePredatorPreyEnv(
         )
 
         if self.sparse_rewards:
-            prey_rewards = steps.sparse_prey_rewards(self.agent_radius)(
+            prey_rewards = esquilax.transforms.spatial(
+                steps.sparse_prey_rewards,
+                reduction=jnp.add,
+                default=0.0,
+                include_self=False,
+                n_bins=floor(0.5 / self.agent_radius),
+                i_range=2 * self.agent_radius,
+            )(
                 key,
                 params.prey_penalty,
                 None,
@@ -80,7 +90,12 @@ class BasePredatorPreyEnv(
                 pos=prey.position,
                 pos_b=predators.position,
             )
-            predator_rewards = steps.sparse_predator_rewards(self.agent_radius)(
+            predator_rewards = esquilax.transforms.nearest_neighbour(
+                steps.sparse_predator_rewards,
+                default=0.0,
+                n_bins=floor(0.5 / self.agent_radius),
+                i_range=2 * self.agent_radius,
+            )(
                 key,
                 params.predator_reward,
                 None,
@@ -89,16 +104,29 @@ class BasePredatorPreyEnv(
                 pos_b=prey.position,
             )
         else:
-            prey_rewards = steps.distance_prey_rewards(0.2 * self.prey_vision_range)(
+            prey_rewards = esquilax.transforms.spatial(
+                steps.distance_prey_rewards,
+                reduction=jnp.add,
+                default=0.0,
+                include_self=False,
+                n_bins=self.n_prey_vision_bins,
+                i_range=self.prey_vision_range,
+            )(
                 key,
                 params.prey_penalty,
                 prey,
                 predators,
                 pos=prey.position,
                 pos_b=predators.position,
+                i_range=self.prey_vision_range,
             )
-            predator_rewards = steps.distance_predator_rewards(
-                0.2 * self.predator_vision_range
+            predator_rewards = esquilax.transforms.spatial(
+                steps.distance_predator_rewards,
+                reduction=jnp.add,
+                default=0.0,
+                include_self=False,
+                n_bins=self.n_predator_view_bins,
+                i_range=self.predator_vision_range,
             )(
                 key,
                 params.predator_reward,
@@ -106,6 +134,7 @@ class BasePredatorPreyEnv(
                 prey,
                 pos=predators.position,
                 pos_b=prey.position,
+                i_range=self.prey_vision_range,
             )
 
         rewards = data_types.PredatorPrey(
@@ -122,23 +151,46 @@ class BasePredatorPreyEnv(
         params: data_types.PredatorPreyParams,
         state: data_types.PredatorPreyState,
     ) -> data_types.PredatorPrey:
-        prey_obs_predators = steps.vision_model(self.prey_vision_range, self.n_vision)(
+        prey_obs_predators = esquilax.transforms.spatial(
+            steps.view,
+            reduction=jnp.minimum,
+            default=jnp.ones((self.n_vision,)),
+            include_self=False,
+            n_bins=self.n_prey_vision_bins,
+            i_range=self.prey_vision_range,
+        )(
             key,
             (params.prey_params.view_angle, self.agent_radius),
             state.prey,
             state.predators,
             pos=state.prey.position,
             pos_b=state.predators.position,
+            n_view=self.n_vision,
+            i_range=self.prey_vision_range,
         )
-        prey_obs_prey = steps.vision_model(self.prey_vision_range, self.n_vision)(
+        prey_obs_prey = esquilax.transforms.spatial(
+            steps.view,
+            reduction=jnp.minimum,
+            default=jnp.ones((self.n_vision,)),
+            include_self=False,
+            n_bins=self.n_prey_vision_bins,
+            i_range=self.prey_vision_range,
+        )(
             key,
             (params.predator_params.view_angle, self.agent_radius),
             state.prey,
             state.prey,
             pos=state.prey.position,
+            n_view=self.n_vision,
+            i_range=self.prey_vision_range,
         )
-        predator_obs_prey = steps.vision_model(
-            self.predator_vision_range, self.n_vision
+        predator_obs_prey = esquilax.transforms.spatial(
+            steps.view,
+            reduction=jnp.minimum,
+            default=jnp.ones((self.n_vision,)),
+            include_self=False,
+            n_bins=self.n_predator_view_bins,
+            i_range=self.predator_vision_range,
         )(
             key,
             (params.predator_params.view_angle, self.agent_radius),
@@ -146,15 +198,24 @@ class BasePredatorPreyEnv(
             state.prey,
             pos=state.predators.position,
             pos_b=state.prey.position,
+            n_view=self.n_vision,
+            i_range=self.predator_vision_range,
         )
-        predator_obs_predator = steps.vision_model(
-            self.predator_vision_range, self.n_vision
+        predator_obs_predator = esquilax.transforms.spatial(
+            steps.view,
+            reduction=jnp.minimum,
+            default=jnp.ones((self.n_vision,)),
+            include_self=False,
+            n_bins=self.n_predator_view_bins,
+            i_range=self.predator_vision_range,
         )(
             key,
             (params.predator_params.view_angle, self.agent_radius),
             state.predators,
             state.predators,
             pos=state.predators.position,
+            n_view=self.n_vision,
+            i_range=self.predator_vision_range,
         )
 
         predator_obs = jnp.hstack([predator_obs_prey, predator_obs_predator])
